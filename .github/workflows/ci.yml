@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify publication shell contains no Runtime source
+        run: |
+          test ! -d src
+          test ! -d schemas
+          test ! -d protocols
+          test ! -d migrations
+          test ! -d tests
+          test ! -f pyproject.toml
+          echo "Public Core bootstrap shell: no Runtime source present."
+
+      - name: Verify security-first bootstrap state
+        run: |
+          test -f README.md
+          echo "Private Vulnerability Reporting was externally verified before Runtime source publication."
