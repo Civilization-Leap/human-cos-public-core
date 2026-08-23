@@ -12,7 +12,7 @@ jobs:
   restore-frozen-lock:
     runs-on: ubuntu-latest
     env:
-      ARTIFACT_URL: 'https://sdmntprdenmarkeast.oaiusercontent.com/files/00000000-5220-8210-a06b-b971b7f79306/raw?se=2026-08-23T23%3A56%3A48Z&sp=r&sv=2026-02-06&sr=b&scid=98d183aa-785b-57ab-b769-bfcf216ebc59&skoid=34268b52-5349-4f34-9be4-e38a5fb9f231&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-23T08%3A46%3A36Z&ske=2026-08-24T08%3A46%3A36Z&sks=b&skv=2026-02-06&sig=LDTR9v2bekT91zzc/PGYeZjEU2TeRVJOZNSIFSf5Dkc%3D'
+      ARTIFACT_URL: 'https://sdmntprdenmarkeast.oaiusercontent.com/files/00000000-1a1c-8210-bdb4-6d3ad6811ab8/raw?se=2026-08-24T00%3A01%3A47Z&sp=r&sv=2026-02-06&sr=b&scid=bac452e5-31f8-535f-b6ba-971ba337b0ab&skoid=34268b52-5349-4f34-9be4-e38a5fb9f231&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-23T22%3A36%3A30Z&ske=2026-08-24T22%3A36%3A30Z&sks=b&skv=2026-02-06&sig=uVPXtLG7OUL/FK2aR%2BLuL46ROlxJJ0f4Gd66nJIFFe0%3D'
       SNAPSHOT_SHA256: '738885d174edd641b66afec672945f46325f02b376d1af9e586cff32a3e74709'
       MANIFEST_SHA256: 'c454ba079de7aac25f51b4f06052dc658854317cd3edb2decd4004cb1db7d20e'
       UV_LOCK_SHA256: '37267c6369be88608eecce1cf251dab0df2ea615131b5efbed1eb89425fb05a5'
