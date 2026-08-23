@@ -1,0 +1,92 @@
+version: 0.1
+tests:
+  - id: AT-01
+    name: "T0 Isolation"
+    level: "BLOCK"
+    target_sprint: "S1"
+    assertion: "POST_T0 Evidence 无论 Prompt 如何请求都不会进入 HISTORICAL_BLIND_EVAL 洁净 Worker Context。"
+  - id: AT-02
+    name: "Worker Isolation"
+    level: "BLOCK"
+    target_sprint: "S3"
+    assertion: "独立阶段一个 Worker 无法读取另一 Worker 的冻结输出。"
+  - id: AT-03
+    name: "Immutable Freeze"
+    level: "BLOCK"
+    target_sprint: "S1/S3"
+    assertion: "冻结 Evidence、Source Snapshot、Raw Output 不允许原位 UPDATE；修订产生新 revision/run。"
+  - id: AT-04
+    name: "Provenance"
+    level: "BLOCK"
+    target_sprint: "S6+"
+    assertion: "任意 Final Claim 可追到 evidence/run/expert/assumption。"
+  - id: AT-05
+    name: "Invalid Gate"
+    level: "BLOCK"
+    target_sprint: "S4+"
+    assertion: "污染或协议无效 Run 不进入内容评分或 Blind Judge。"
+  - id: AT-06
+    name: "Model Fallback"
+    level: "BLOCK"
+    target_sprint: "S2/S3"
+    assertion: "fallback 必须显式写入 Manifest/lineage，禁止静默替换。"
+  - id: AT-07
+    name: "Dissent Preservation"
+    level: "BLOCK"
+    target_sprint: "S6+"
+    assertion: "高影响少数意见不能被 Final Synthesis 静默删除。"
+  - id: AT-08
+    name: "Falsification Gate"
+    level: "BLOCK"
+    target_sprint: "S7+"
+    assertion: "缺 wrong_if 的关键 Final Claim 不得 Seal。"
+  - id: AT-09
+    name: "Expert Independence"
+    level: "BLOCK"
+    target_sprint: "S5+"
+    assertion: "独立专家任务看不到其他专家或 AI 答案。"
+  - id: AT-10
+    name: "Replay Lineage"
+    level: "REQ"
+    target_sprint: "S3"
+    assertion: "同 Manifest 可重放流程并形成可比较 lineage；不要求文本逐字一致。"
+  - id: AT-11
+    name: "Baseline Parity"
+    level: "BLOCK"
+    target_sprint: "S4"
+    assertion: "Human-COS/Baseline 的输入、时间、工具、预算、输出契约差异可检测并记录。"
+  - id: AT-12
+    name: "Dual Framing"
+    level: "BLOCK"
+    target_sprint: "S5"
+    assertion: "Civilization-Critical Case 默认不能只运行单一 Initial Framing。"
+  - id: AT-13
+    name: "Qualification Gate"
+    level: "BLOCK"
+    target_sprint: "S2"
+    assertion: "未准入模型不可承担 Meta-Controller 或受限专业任务。"
+  - id: AT-14
+    name: "Capability Gap"
+    level: "BLOCK"
+    target_sprint: "S2"
+    assertion: "无合格专业能力时系统返回缺口/暂停，不自动降级为通用角色扮演。"
+  - id: AT-15
+    name: "Evidence-as-Data"
+    level: "BLOCK"
+    target_sprint: "S1/S3"
+    assertion: "外部证据中的指令不能改变系统协议、系统提示或 Tool Policy。"
+  - id: AT-16
+    name: "Safety Tool Gate"
+    level: "BLOCK"
+    target_sprint: "S3"
+    assertion: "高风险 Case 默认无法调用现实执行型工具。"
+  - id: AT-17
+    name: "World Revision"
+    level: "REQ"
+    target_sprint: "S6/S7"
+    assertion: "Scenario re-simulation 产生新 WorldState revision，不覆盖原状态。"
+  - id: AT-18
+    name: "Publication Gate"
+    level: "BLOCK"
+    target_sprint: "S10"
+    assertion: "RESTRICTED/WITHHELD 对象不能被公开导出。"

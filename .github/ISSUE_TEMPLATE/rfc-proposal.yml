@@ -1,0 +1,35 @@
+name: RFC proposal
+description: Propose a semantic change or identify a semantic debt that may require a formal RFC.
+title: "[RFC Proposal] "
+labels: []
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or semantic debt
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current behavior / contract
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Regression and compatibility impact
+      description: State whether Protocol, Schema, permissions, admission, publication, safety or Frozen Contract semantics would change.
+    validations:
+      required: true
+  - type: textarea
+    id: falsification
+    attributes:
+      label: Counterarguments / falsification conditions
+      description: What evidence would show that this change is unnecessary or wrong?

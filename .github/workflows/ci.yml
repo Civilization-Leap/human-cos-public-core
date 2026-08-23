@@ -8,23 +8,65 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: human_cos
+          POSTGRES_PASSWORD: human_cos
+          POSTGRES_DB: human_cos_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U human_cos -d human_cos_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      HUMAN_COS_TEST_DATABASE_URL: postgresql://human_cos:human_cos@localhost:5432/human_cos_test
     strategy:
       matrix:
         python-version: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify publication shell contains no Runtime source
-        run: |
-          test ! -d src
-          test ! -d schemas
-          test ! -d protocols
-          test ! -d migrations
-          test ! -d tests
-          test ! -f pyproject.toml
-          echo "Public Core bootstrap shell: no Runtime source present."
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-      - name: Verify security-first bootstrap state
+      # P0-1: install from the FROZEN lockfile, never from live ranges.
+      - name: Sync frozen lockfile (incl. dev group)
+        run: uv sync --extra dev --frozen
+
+      - name: Unit + protocol + frozen-contract tests
+        run: uv run pytest -q
+
+      - name: Lint (ruff)
+        run: uv run ruff check src tests
+
+      # P0-2: format is CI-enforced, not just local.
+      - name: Format check (ruff format --check)
+        run: uv run ruff format --check src tests
+
+      - name: Type check (mypy)
+        run: uv run mypy src/human_cos
+
+      - name: CLI smoke
+        run: uv run human-cos-protocols load protocols/protocol_registry_v0.1.yaml
+
+      # P0-3: any byte change to the 10 signed contract files fails here.
+      - name: Frozen contract hash gate
+        run: uv run pytest -q tests/protocol/test_frozen_contract.py
+
+      - name: Secret scan
+        # Scan only Git-tracked repository files. The prior recursive grep also
+        # scanned the generated .venv and produced binary false positives.
         run: |
-          test -f README.md
-          echo "Private Vulnerability Reporting was externally verified before Runtime source publication."
+          if git grep -nE '(AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)' -- . ; then
+            echo "Potential secret committed to repository." >&2; exit 1
+          fi
+          echo "Secret scan: clean"
+
+      - name: Docker build (contract import works from clean image)
+        run: docker build -t human-cos-runtime:s0 .

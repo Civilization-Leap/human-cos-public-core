@@ -1,0 +1,39 @@
+name: Reproducibility or bug report
+description: Report a reproducible implementation, test, invariant or documentation defect.
+title: "[Bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not submit security vulnerabilities here. Use GitHub Private Vulnerability Reporting.
+  - type: input
+    id: commit
+    attributes:
+      label: Affected commit or release
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Include commands, input shape and environment without private data or live credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Why this matters
+      description: State whether the finding affects reproducibility, an invariant, Frozen Contract enforcement, T0/ACL, storage, or another boundary.
