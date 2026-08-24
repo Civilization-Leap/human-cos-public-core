@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Verify frozen transfer chunks
+      - name: Repair the single-byte transfer defect deterministically
         shell: bash
         run: |
           set -euo pipefail
@@ -29,32 +29,46 @@ jobs:
           import hashlib
           from pathlib import Path
 
-          expected = {
-              'uv_lock_gz_b64.part-00': 'ad77e3693042f67d84853de3aca986f17d8b19119a0a2a2bcbaad7a0759ae480',
-              'uv_lock_gz_b64.part-01': '07639b657fbf4c01f8ce0fc30c4f23b52f3cbf0bcd1b65e75fae90bc6f013bb2',
-              'uv_lock_gz_b64.part-02': 'fe37ffbc816f43f607952bee6e0ed6fb2fbd055ee49648b49404abd57dda30db',
-              'uv_lock_gz_b64.part-03': 'cbfeab30ae59ba7192062cc5ee1f23ee3081d0e8271fc08d5bcbcbba018070e3',
-              'uv_lock_gz_b64.part-04': '1157fa994b1c921f7e86cfca9b1de0504fe615e95dd3ae1d736448f170400250',
-              'uv_lock_gz_b64.part-05': 'ac587f5d23a4f663e4532f858457900fc13307de6ef6d1cb05219b87f5517469',
-              'uv_lock_gz_b64.part-06': 'f7a9c9bc672cbf3781eca2a4cf78fbe61088addfe68a719fcf539f859bb442bb',
-              'uv_lock_gz_b64.part-07': '0180fc6ae3f9ac2091e48527b312a7ec270caf6f888febdfa2116247866476f4',
-              'uv_lock_gz_b64.part-08': '19858fd25fc860bb606e22b39a4e185786ebfc73fb7ef64a1913a1a57e4d2a0b',
-              'uv_lock_gz_b64.part-09': '3851124709a3ca4e9b0c1079f41804f59bc9b744d360ed15443138c9ef47a3be',
-              'uv_lock_gz_b64.part-10': '7fd18bdc9797bbb95a1fdb033597abb73088954ab9e2f51565d514acebf5598e',
-              'uv_lock_gz_b64.part-11': 'a5042a408f2224d2c9d240bdabe90c6cfb6079a52b2514beb84587a41a92ec5a',
-          }
           root = Path('.release')
-          actual = {p.name for p in root.glob('uv_lock_gz_b64.part-*') if p.is_file()}
-          if actual != set(expected):
-              raise SystemExit(f'chunk set mismatch: actual={sorted(actual)}')
-          for name, want in expected.items():
-              got = hashlib.sha256((root / name).read_bytes()).hexdigest()
-              if got != want:
-                  raise SystemExit(f'chunk hash mismatch: {name}: {got} != {want}')
-          print('Transfer chunks: PASS (12/12)')
+          expected_names = {f'uv_lock_gz_b64.part-{i:02d}' for i in range(12)}
+          actual_names = {p.name for p in root.glob('uv_lock_gz_b64.part-*') if p.is_file()}
+          if actual_names != expected_names:
+              raise SystemExit(f'chunk set mismatch: actual={sorted(actual_names)}')
+
+          p = root / 'uv_lock_gz_b64.part-02'
+          want = 'fe37ffbc816f43f607952bee6e0ed6fb2fbd055ee49648b49404abd57dda30db'
+          raw = p.read_bytes()
+          got = hashlib.sha256(raw).hexdigest()
+          if got == want:
+              print('part-02 already exact; no repair needed')
+          else:
+              if len(raw) != 9259:
+                  raise SystemExit(f'part-02 unexpected length: {len(raw)}')
+              alphabet = b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+              matches = []
+              for pos in range(len(raw) + 1):
+                  prefix = hashlib.sha256()
+                  prefix.update(raw[:pos])
+                  suffix = raw[pos:]
+                  for ch in alphabet:
+                      h = prefix.copy()
+                      h.update(bytes((ch,)))
+                      h.update(suffix)
+                      if h.hexdigest() == want:
+                          matches.append((pos, ch))
+                  if len(matches) > 1:
+                      break
+              if len(matches) != 1:
+                  raise SystemExit(f'part-02 repair must be unique; matches={matches}')
+              pos, ch = matches[0]
+              repaired = raw[:pos] + bytes((ch,)) + raw[pos:]
+              if len(repaired) != 9260 or hashlib.sha256(repaired).hexdigest() != want:
+                  raise SystemExit('part-02 deterministic repair verification failed')
+              p.write_bytes(repaired)
+              print(f'part-02 repaired uniquely at byte {pos}; SHA-256 exact')
           PY
 
-      - name: Reconstruct exact frozen uv.lock offline
+      - name: Reconstruct exact frozen uv.lock and verify end-to-end hashes
         shell: bash
         run: |
           set -euo pipefail
@@ -94,10 +108,12 @@ jobs:
               for row in bad:
                   print(row)
               raise SystemExit('manifest file verification failed')
-          print(f"Manifest file hashes: PASS ({len(manifest['files'])}/71)")
+          if len(manifest['files']) != 71:
+              raise SystemExit(f"manifest file count drift: {len(manifest['files'])}")
+          print('Manifest file hashes: PASS (71/71)')
           PY
 
-      - name: Remove transfer-only files and verify exact final tree
+      - name: Remove transfer-only material and verify exact final tree
         shell: bash
         run: |
           set -euo pipefail
@@ -122,7 +138,9 @@ jobs:
               print('missing=', missing)
               print('extra=', extra)
               raise SystemExit('final tree path mismatch')
-          print(f'Final tree paths: PASS ({len(actual)} files)')
+          if len(actual) != 73:
+              raise SystemExit(f'final file-count drift: {len(actual)}')
+          print('Final tree paths: PASS (73/73)')
           PY
 
       - name: Commit exact final Public Core tree
