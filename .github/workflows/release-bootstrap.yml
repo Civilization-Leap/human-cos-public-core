@@ -9,79 +9,133 @@ permissions:
   contents: write
 
 jobs:
-  restore-frozen-lock:
+  restore-frozen-lock-offline:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     env:
-      ARTIFACT_URL: 'https://sdmntprdenmarkeast.oaiusercontent.com/files/00000000-1a1c-8210-bdb4-6d3ad6811ab8/raw?se=2026-08-24T00%3A01%3A47Z&sp=r&sv=2026-02-06&sr=b&scid=bac452e5-31f8-535f-b6ba-971ba337b0ab&skoid=34268b52-5349-4f34-9be4-e38a5fb9f231&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-23T22%3A36%3A30Z&ske=2026-08-24T22%3A36%3A30Z&sks=b&skv=2026-02-06&sig=uVPXtLG7OUL/FK2aR%2BLuL46ROlxJJ0f4Gd66nJIFFe0%3D'
-      SNAPSHOT_SHA256: '738885d174edd641b66afec672945f46325f02b376d1af9e586cff32a3e74709'
-      MANIFEST_SHA256: 'c454ba079de7aac25f51b4f06052dc658854317cd3edb2decd4004cb1db7d20e'
-      UV_LOCK_SHA256: '37267c6369be88608eecce1cf251dab0df2ea615131b5efbed1eb89425fb05a5'
+      MANIFEST_SHA256: c454ba079de7aac25f51b4f06052dc658854317cd3edb2decd4004cb1db7d20e
+      UV_LOCK_GZIP_SHA256: 1319576ee68dc5d9a4601e0dd4bba9da96741fb9f44c3aecb5f0e35814d36625
+      UV_LOCK_SHA256: 37267c6369be88608eecce1cf251dab0df2ea615131b5efbed1eb89425fb05a5
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Verify pre-restore tree against frozen manifest
+      - name: Verify frozen transfer chunks
+        shell: bash
         run: |
+          set -euo pipefail
           python - <<'PY'
-          import hashlib, json, pathlib, sys
-          root = pathlib.Path('.')
-          manifest_path = root / 'PUBLIC_CORE_MANIFEST.json'
-          got = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
-          expected = 'c454ba079de7aac25f51b4f06052dc658854317cd3edb2decd4004cb1db7d20e'
-          if got != expected:
-              raise SystemExit(f'manifest drift: {got} != {expected}')
-          m = json.loads(manifest_path.read_text(encoding='utf-8'))
-          bad=[]
-          for item in m['files']:
-              p=root/item['path']
-              if item['path']=='uv.lock':
-                  if p.exists(): bad.append(('uv.lock','unexpectedly present before restore'))
-                  continue
-              if not p.is_file():
-                  bad.append((item['path'],'missing')); continue
-              h=hashlib.sha256(p.read_bytes()).hexdigest()
-              if h != item['sha256']: bad.append((item['path'],h))
-          if bad:
-              print(bad)
-              raise SystemExit('pre-restore manifest mismatch')
-          print('Pre-restore manifest check: PASS')
+          import hashlib
+          from pathlib import Path
+
+          expected = {
+              'uv_lock_gz_b64.part-00': 'ad77e3693042f67d84853de3aca986f17d8b19119a0a2a2bcbaad7a0759ae480',
+              'uv_lock_gz_b64.part-01': '07639b657fbf4c01f8ce0fc30c4f23b52f3cbf0bcd1b65e75fae90bc6f013bb2',
+              'uv_lock_gz_b64.part-02': 'fe37ffbc816f43f607952bee6e0ed6fb2fbd055ee49648b49404abd57dda30db',
+              'uv_lock_gz_b64.part-03': 'cbfeab30ae59ba7192062cc5ee1f23ee3081d0e8271fc08d5bcbcbba018070e3',
+              'uv_lock_gz_b64.part-04': '1157fa994b1c921f7e86cfca9b1de0504fe615e95dd3ae1d736448f170400250',
+              'uv_lock_gz_b64.part-05': 'ac587f5d23a4f663e4532f858457900fc13307de6ef6d1cb05219b87f5517469',
+              'uv_lock_gz_b64.part-06': 'f7a9c9bc672cbf3781eca2a4cf78fbe61088addfe68a719fcf539f859bb442bb',
+              'uv_lock_gz_b64.part-07': '0180fc6ae3f9ac2091e48527b312a7ec270caf6f888febdfa2116247866476f4',
+              'uv_lock_gz_b64.part-08': '19858fd25fc860bb606e22b39a4e185786ebfc73fb7ef64a1913a1a57e4d2a0b',
+              'uv_lock_gz_b64.part-09': '3851124709a3ca4e9b0c1079f41804f59bc9b744d360ed15443138c9ef47a3be',
+              'uv_lock_gz_b64.part-10': '7fd18bdc9797bbb95a1fdb033597abb73088954ab9e2f51565d514acebf5598e',
+              'uv_lock_gz_b64.part-11': 'a5042a408f2224d2c9d240bdabe90c6cfb6079a52b2514beb84587a41a92ec5a',
+          }
+          root = Path('.release')
+          actual = {p.name for p in root.glob('uv_lock_gz_b64.part-*') if p.is_file()}
+          if actual != set(expected):
+              raise SystemExit(f'chunk set mismatch: actual={sorted(actual)}')
+          for name, want in expected.items():
+              got = hashlib.sha256((root / name).read_bytes()).hexdigest()
+              if got != want:
+                  raise SystemExit(f'chunk hash mismatch: {name}: {got} != {want}')
+          print('Transfer chunks: PASS (12/12)')
           PY
 
-      - name: Retrieve previously audited frozen release artifact
+      - name: Reconstruct exact frozen uv.lock offline
+        shell: bash
         run: |
-          curl --fail --location --retry 3 --output /tmp/release-artifact.zip "$ARTIFACT_URL"
-          unzip -q /tmp/release-artifact.zip -d /tmp/release-artifact
-          test -f /tmp/release-artifact/human-cos-public-core_final_clean_snapshot.zip
-          echo "$SNAPSHOT_SHA256  /tmp/release-artifact/human-cos-public-core_final_clean_snapshot.zip" | sha256sum -c -
-
-      - name: Restore exact uv.lock and verify full frozen snapshot
-        run: |
-          unzip -p /tmp/release-artifact/human-cos-public-core_final_clean_snapshot.zip uv.lock > uv.lock
+          set -euo pipefail
+          cat .release/uv_lock_gz_b64.part-* > /tmp/uv.lock.gz.b64
+          base64 --decode /tmp/uv.lock.gz.b64 > /tmp/uv.lock.gz
+          echo "$UV_LOCK_GZIP_SHA256  /tmp/uv.lock.gz" | sha256sum -c -
+          gzip -dc /tmp/uv.lock.gz > uv.lock
           echo "$UV_LOCK_SHA256  uv.lock" | sha256sum -c -
+          test "$(wc -c < uv.lock)" -eq 270530
+
+      - name: Verify frozen manifest and all manifest files
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$MANIFEST_SHA256  PUBLIC_CORE_MANIFEST.json" | sha256sum -c -
+          sha256sum -c PUBLIC_CORE_MANIFEST.sha256
           python - <<'PY'
-          import hashlib, json, pathlib
-          root=pathlib.Path('.')
-          m=json.loads((root/'PUBLIC_CORE_MANIFEST.json').read_text(encoding='utf-8'))
-          bad=[]
-          for item in m['files']:
-              p=root/item['path']
-              if not p.is_file(): bad.append((item['path'],'missing')); continue
-              h=hashlib.sha256(p.read_bytes()).hexdigest()
-              if h != item['sha256']: bad.append((item['path'],h))
+          import hashlib, json
+          from pathlib import Path
+
+          root = Path('.')
+          manifest = json.loads((root / 'PUBLIC_CORE_MANIFEST.json').read_text(encoding='utf-8'))
+          bad = []
+          for item in manifest['files']:
+              path = root / item['path']
+              if not path.is_file():
+                  bad.append((item['path'], 'missing'))
+                  continue
+              data = path.read_bytes()
+              if len(data) != item['bytes']:
+                  bad.append((item['path'], f"bytes={len(data)} expected={item['bytes']}"))
+                  continue
+              got = hashlib.sha256(data).hexdigest()
+              if got != item['sha256']:
+                  bad.append((item['path'], f"sha256={got} expected={item['sha256']}"))
           if bad:
-              print(bad)
-              raise SystemExit('full manifest mismatch')
-          print(f"Full manifest check: PASS ({len(m['files'])} files)")
+              for row in bad:
+                  print(row)
+              raise SystemExit('manifest file verification failed')
+          print(f"Manifest file hashes: PASS ({len(manifest['files'])}/71)")
           PY
 
-      - name: Remove one-time bootstrap and commit exact final tree
+      - name: Remove transfer-only files and verify exact final tree
+        shell: bash
         run: |
+          set -euo pipefail
+          rm -rf .release
           rm .github/workflows/release-bootstrap.yml
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          manifest = json.loads((root / 'PUBLIC_CORE_MANIFEST.json').read_text(encoding='utf-8'))
+          expected = {item['path'] for item in manifest['files']}
+          expected |= {'PUBLIC_CORE_MANIFEST.json', 'PUBLIC_CORE_MANIFEST.sha256'}
+          actual = {
+              str(p.relative_to(root))
+              for p in root.rglob('*')
+              if p.is_file() and '.git' not in p.parts
+          }
+          missing = sorted(expected - actual)
+          extra = sorted(actual - expected)
+          if missing or extra:
+              print('missing=', missing)
+              print('extra=', extra)
+              raise SystemExit('final tree path mismatch')
+          print(f'Final tree paths: PASS ({len(actual)} files)')
+          PY
+
+      - name: Commit exact final Public Core tree
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name 'Civilization-Leap'
           git config user.email 'actions@users.noreply.github.com'
-          git add uv.lock .github/workflows/release-bootstrap.yml
+          git add -A
+          echo 'Finalization delta:'
           git diff --cached --name-status
-          test "$(git diff --cached --name-only | sort | tr '\n' ' ')" = ".github/workflows/release-bootstrap.yml uv.lock "
-          git commit -m 'release(public-core): restore frozen uv.lock and finalize exact S0/S1 snapshot'
+          test -f uv.lock
+          test ! -e .release
+          test ! -e .github/workflows/release-bootstrap.yml
+          git commit -m 'release(public-core): finalize exact audited S0/S1 snapshot'
           git push origin HEAD:release/public-core-s0-s1-v1
