@@ -16,6 +16,7 @@ jobs:
       MANIFEST_SHA256: c454ba079de7aac25f51b4f06052dc658854317cd3edb2decd4004cb1db7d20e
       UV_LOCK_GZIP_SHA256: 1319576ee68dc5d9a4601e0dd4bba9da96741fb9f44c3aecb5f0e35814d36625
       UV_LOCK_SHA256: 37267c6369be88608eecce1cf251dab0df2ea615131b5efbed1eb89425fb05a5
+      LICENSE_SHA256: 325648a2d789644d9f57e7b102adc897d85127a25dbecfff251ffbe73f76b7f7
     steps:
       - uses: actions/checkout@v4
         with:
@@ -78,6 +79,34 @@ jobs:
           gzip -dc /tmp/uv.lock.gz > uv.lock
           echo "$UV_LOCK_SHA256  uv.lock" | sha256sum -c -
           test "$(wc -c < uv.lock)" -eq 270530
+
+      - name: Repair the frozen Apache-2.0 text omission deterministically
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+
+          p = Path('LICENSE')
+          want = '325648a2d789644d9f57e7b102adc897d85127a25dbecfff251ffbe73f76b7f7'
+          data = p.read_bytes()
+          if hashlib.sha256(data).hexdigest() == want:
+              print('LICENSE already exact; no repair needed')
+          else:
+              old = b'You may add Your own attribution notices within Derivative Works, alongside'
+              new = b'You may add Your own attribution notices within Derivative Works that You distribute, alongside'
+              if data.count(old) != 1:
+                  raise SystemExit(f'LICENSE deterministic repair anchor count={data.count(old)}')
+              fixed = data.replace(old, new, 1)
+              if len(fixed) != 10258:
+                  raise SystemExit(f'LICENSE repaired length={len(fixed)} expected=10258')
+              got = hashlib.sha256(fixed).hexdigest()
+              if got != want:
+                  raise SystemExit(f'LICENSE repaired SHA-256={got} expected={want}')
+              p.write_bytes(fixed)
+              print('LICENSE deterministic repair: PASS (10258 bytes; frozen SHA-256 exact)')
+          PY
 
       - name: Verify frozen manifest and all manifest files
         shell: bash
