@@ -2,9 +2,9 @@
 
 Initial public engineering baseline: **S0/S1 Public Core**
 
-## Canonical release record
+## Canonical initial release record
 
-Private source anchor:
+Initial private source anchor:
 
 `Civilization-Leap/human-cos-runtime@da2c62e21871e911ab26b877928676bc81056e09`
 
@@ -32,7 +32,28 @@ Frozen `uv.lock` SHA-256:
 
 `37267c6369be88608eecce1cf251dab0df2ea615131b5efbed1eb89425fb05a5`
 
-The snapshot and manifest hashes above belong to the **initial protected-main release commit**. Later documentation-only closure metadata does not redefine that frozen initial-release snapshot and must not be used to recalculate or replace those hashes.
+The snapshot and manifest hashes above belong exclusively to the **initial protected-main release commit**. They are historical frozen identities and must not be recalculated or replaced because of later maintenance work.
+
+## Subsequent packaging-hardening maintenance state
+
+Canonical private maintenance source anchor:
+
+`Civilization-Leap/human-cos-runtime@4098a69817d220634b156fab12ee3d664d504e8e`
+
+Canonical private PR: `human-cos-runtime#5` — S1 packaging hardening: installed resource-safe wheel support.
+
+This maintenance state adds distribution transport and verification only:
+
+- package-internal byte-identical copies of the Frozen Contract manifest, Registry, 9 Schemas and S1 migrations;
+- installed-resource-safe loading via Python package resources;
+- bundled-registry CLI fallback when no repository path is supplied;
+- packaged-resource byte-identity regression gates;
+- normal wheel build and clean non-editable installation validation outside the repository;
+- installed-distribution verification of Registry loading, JSON Schema `date-time` enforcement, Frozen Contract 10/10, and PostgreSQL S1 forward/rollback migrations.
+
+It does **not** change the Frozen Contract, `BASELINE_CONTRACT_HASHES.yaml`, `uv.lock`, the S0/S1 Runtime semantic baseline, or S2 authorization state.
+
+The protected-main public maintenance commit is recorded as post-merge closure evidence rather than guessed in advance. The initial release commit/tree/snapshot/manifest remain unchanged regardless of that later commit.
 
 ## Included capability
 
@@ -46,15 +67,19 @@ The snapshot and manifest hashes above belong to the **initial protected-main re
 - append-only Case/Evidence revisions;
 - Context admission sidecar and provenance binding;
 - PostgreSQL S1 storage/migrations;
-- protocol, contract, unit and integration tests.
+- protocol, contract, unit and integration tests;
+- source-checkout/editable reproduction;
+- locally built wheel / non-editable installation with bundled contract and migration resources.
 
 ## Not included / not authorized
 
-This release does not include or authorize S2 or later Runtime capability, model registry/adapters, qualification, full state-machine orchestration, Responsibility Map, No Silent Crossing execution guard, cross-platform federation, or real-world execution.
+This maintenance state does not include or authorize S2 or later Runtime capability, model registry/adapters, qualification, full state-machine orchestration, Responsibility Map, No Silent Crossing execution guard, cross-platform federation, or real-world execution.
 
-Wheel/PyPI/non-editable installation support is not claimed by this initial source-reproducibility release and remains separately tracked in Issue #4.
+PyPI publication is not claimed. A local wheel built from this source tree is the supported non-editable installation contract for this maintenance state.
 
-## Publication gates — final closure
+Public Issue #4 remains the closure/evidence tracker until the protected-main maintenance commit, public required checks, installed-distribution verification and final provenance record are all confirmed.
+
+## Initial publication gates — frozen record
 
 - G0 Public Scope: **PASS**
 - G1 Source provenance: **PASS**
@@ -67,8 +92,8 @@ Wheel/PyPI/non-editable installation support is not claimed by this initial sour
 - G8 Hardened release validation: **PASS** — manifest 72/72, final tree 74/74, Frozen Contract drift 0/10, public Python 3.10/3.12 required checks passed
 - G9 Formal protected-main publication: **PASS** — initial Public Core source release merged at `b7fd3b42eef257f3c9c8fe5942e09f6606e3756d`
 
-## Post-publication metadata boundary
+## Maintenance boundary
 
-This document may be updated after publication to record closure evidence. Such metadata-only updates are **not** a new Runtime release, do not modify the initial frozen snapshot, do not alter the Frozen Contract, do not close Issue #4, and do not authorize S2.
+Subsequent maintenance may improve reproducibility, packaging, tests or documentation without redefining the initial release identity or the Frozen Contract. Any semantic protocol change still requires the separate RFC + regression-impact + new-baseline process.
 
 The public repository is a reproducibility surface, not an authority over independent professional judgment or real-world decisions.

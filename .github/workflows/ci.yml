@@ -45,7 +45,6 @@ jobs:
       - name: Lint (ruff)
         run: uv run ruff check src tests
 
-      # P0-2: format is CI-enforced, not just local.
       - name: Format check (ruff format --check)
         run: uv run ruff format --check src tests
 
@@ -53,15 +52,36 @@ jobs:
         run: uv run mypy src/human_cos
 
       - name: CLI smoke
-        run: uv run human-cos-protocols load protocols/protocol_registry_v0.1.yaml
+        run: |
+          uv run human-cos-protocols load protocols/protocol_registry_v0.1.yaml
+          uv run human-cos-protocols load
 
       # P0-3: any byte change to the 10 signed contract files fails here.
       - name: Frozen contract hash gate
-        run: uv run pytest -q tests/protocol/test_frozen_contract.py
+        run: uv run pytest -q tests/protocol/test_frozen_contract.py tests/protocol/test_packaged_resources.py
+
+      - name: Build wheel
+        run: uv build --wheel --out-dir dist
+
+      - name: Clean non-editable wheel validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheel="$(ls dist/human_cos_runtime-*.whl)"
+          env_dir="${RUNNER_TEMP}/human-cos-wheel-${{ matrix.python-version }}"
+          requirements="${RUNNER_TEMP}/human-cos-wheel-${{ matrix.python-version }}.txt"
+          uv export --frozen --no-dev --no-emit-project --format requirements-txt --output-file "$requirements"
+          uv venv "$env_dir" --python "${{ matrix.python-version }}"
+          uv pip install --python "$env_dir/bin/python" -r "$requirements"
+          uv pip install --python "$env_dir/bin/python" --no-deps "$wheel"
+          (
+            cd "$RUNNER_TEMP"
+            "$env_dir/bin/human-cos-protocols" load
+            HUMAN_COS_TEST_DATABASE_URL="$HUMAN_COS_TEST_DATABASE_URL" \
+              "$env_dir/bin/python" "$GITHUB_WORKSPACE/tests/integration/wheel_smoke.py"
+          )
 
       - name: Secret scan
-        # Scan only Git-tracked repository files. The prior recursive grep also
-        # scanned the generated .venv and produced binary false positives.
         run: |
           if git grep -nE '(AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)' -- . ; then
             echo "Potential secret committed to repository." >&2; exit 1

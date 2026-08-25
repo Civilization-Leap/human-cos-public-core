@@ -1,24 +1,33 @@
 """``human-cos-protocols`` CLI.
 
-Small operational surface for the S0 deliverable:
-- ``load <path>`` : load + validate a protocol registry, print summary.
-- ``snapshot <path>`` : print a stable id->version snapshot (for change control).
-
-No write path exists yet; S0 only fixes the contract.
+``load`` and ``snapshot`` accept an explicit registry path.  When omitted they
+operate on the byte-identical Protocol Registry bundled with the installed
+Human-COS distribution, so a repository checkout is not required.
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
+from typing import cast
+
+from human_cos.resources import read_runtime_resource_text
 
 from .registry import ProtocolRegistryError, load_protocol_registry
 
+_BUNDLED_REGISTRY = "protocols/protocol_registry_v0.1.yaml"
 
-def _cmd_load(registry_path: str) -> int:
+
+def _registry_source(registry_path: str | None) -> str:
+    if registry_path is not None:
+        return registry_path
+    return cast(str, read_runtime_resource_text(_BUNDLED_REGISTRY, prefer_source=False))
+
+
+def _cmd_load(registry_path: str | None) -> int:
     try:
-        registry = load_protocol_registry(registry_path)
-    except ProtocolRegistryError as exc:
+        registry = load_protocol_registry(_registry_source(registry_path))
+    except (ProtocolRegistryError, FileNotFoundError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     print(f"registry_version={registry.version} status={registry.status}")
@@ -29,10 +38,10 @@ def _cmd_load(registry_path: str) -> int:
     return 0
 
 
-def _cmd_snapshot(registry_path: str) -> int:
+def _cmd_snapshot(registry_path: str | None) -> int:
     try:
-        registry = load_protocol_registry(registry_path)
-    except ProtocolRegistryError as exc:
+        registry = load_protocol_registry(_registry_source(registry_path))
+    except (ProtocolRegistryError, FileNotFoundError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     for entry in registry.protocols:
@@ -44,9 +53,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="human-cos-protocols")
     sub = parser.add_subparsers(dest="command", required=True)
     p_load = sub.add_parser("load", help="load and validate a protocol registry")
-    p_load.add_argument("path")
+    p_load.add_argument("path", nargs="?", help="registry path; defaults to packaged V0.1 registry")
     p_snap = sub.add_parser("snapshot", help="print a stable id@version snapshot")
-    p_snap.add_argument("path")
+    p_snap.add_argument("path", nargs="?", help="registry path; defaults to packaged V0.1 registry")
     args = parser.parse_args(argv)
 
     if args.command == "load":

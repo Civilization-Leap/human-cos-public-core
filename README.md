@@ -27,17 +27,21 @@ Not implemented in this Public Core:
 
 ## Publication provenance
 
-Current Public Core source anchor:
+Initial Public Core Runtime source anchor:
 
 `Civilization-Leap/human-cos-runtime@da2c62e21871e911ab26b877928676bc81056e09`
 
-This source anchor includes the S1 pre-publication hardening merged in private PR #4: enforcement of already-declared JSON Schema `date-time` formats and registry-level metadata coverage in the strict Frozen Registry change guard. The Protocol Registry YAML, all 9 Frozen Schemas and `BASELINE_CONTRACT_HASHES.yaml` remain unchanged.
+Current packaging-hardening maintenance source anchor:
+
+`Civilization-Leap/human-cos-runtime@4098a69817d220634b156fab12ee3d664d504e8e`
+
+The maintenance anchor is a direct S0/S1 distribution-hardening descendant of the initial source anchor. It packages byte-identical transport copies of the already-frozen contract resources, adds installed-resource-safe loading and clean-wheel validation, and does **not** change the Protocol Registry YAML, any of the 9 Frozen Schemas, `BASELINE_CONTRACT_HASHES.yaml`, or `uv.lock`.
 
 Public repository:
 
 `Civilization-Leap/human-cos-public-core`
 
-The Public Core starts from a **curated clean snapshot with new public Git history**. The complete private engineering history is intentionally excluded. See `PUBLIC_PROVENANCE.md` and `PUBLIC_CORE_MANIFEST.json`.
+The Public Core starts from a **curated clean snapshot with new public Git history**. The complete private engineering history is intentionally excluded. The initial protected-main release identities remain frozen; this packaging work is a subsequent maintenance state rather than a rewrite of the initial release. See `PUBLIC_PROVENANCE.md`, `RELEASE_STATUS.md` and the initial-release `PUBLIC_CORE_MANIFEST.json`.
 
 ## License and attribution
 
@@ -59,14 +63,15 @@ Use the repository's GitHub **Security → Advisories → Report a vulnerability
 - `src/human_cos/protocols/` — registry loader, version validator, no-silent-mutation guard, frozen-contract verifier, schema loader.
 - `protocols/protocol_registry_v0.1.yaml` + `schemas/*.schema.json` — Frozen Contract: Protocol Registry + 9 Schemas.
 - `BASELINE_CONTRACT_HASHES.yaml` — byte-locks those 10 files.
+- `src/human_cos/_resources/` — byte-identical distribution transport copies for installed wheel/non-editable use; not a second semantic baseline.
 - `src/human_cos/core/` + `src/human_cos/storage/` — S1 data boundary and PostgreSQL layer.
 - `migrations/` — S1 forward/rollback SQL.
-- `tests/` — protocol, contract, ACL, unit and PostgreSQL integration tests.
+- `tests/` — protocol, contract, ACL, unit, PostgreSQL integration and clean-wheel smoke tests.
 - `docs/adr/` — implementation architecture decisions.
 - `rfcs/` — semantic-change process.
-- `.github/workflows/ci.yml` — tests, lint/format, type check, CLI, Frozen Contract gate, secret scan and Docker build.
+- `.github/workflows/ci.yml` — tests, lint/format, type check, bundled CLI, Frozen Contract gates, clean-wheel validation, secret scan and Docker build.
 
-## Quick start
+## Quick start — source checkout
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
@@ -84,13 +89,28 @@ docker run --rm human-cos-runtime:s1 pytest -q
 
 PostgreSQL-backed integration tests require `HUMAN_COS_TEST_DATABASE_URL`; the GitHub Actions workflow supplies a disposable PostgreSQL 16 service.
 
-The initial Public Core release supports **source checkout + editable installation** and source-tree/Docker reproduction. It does not currently claim wheel/PyPI/non-editable installation support; that packaging hardening is tracked separately in Issue #4.
+## Local wheel / non-editable installation
+
+The packaging-hardening maintenance state supports building and installing a normal wheel without retaining a repository checkout at runtime:
+
+```bash
+uv build --wheel --out-dir dist
+python -m venv /tmp/human-cos-wheel
+/tmp/human-cos-wheel/bin/pip install dist/human_cos_runtime-*.whl
+(cd /tmp && /tmp/human-cos-wheel/bin/human-cos-protocols load)
+```
+
+CI repeats this from outside the repository on Python 3.10 and 3.12 and verifies bundled Registry loading, JSON Schema `date-time` enforcement, Frozen Contract 10/10 verification, and S1 PostgreSQL forward/rollback migrations.
+
+**PyPI publication is not claimed and no PyPI release is asserted by this repository.** Wheel support here means a wheel built from this source tree can be installed non-editably with its required contract/migration resources present.
 
 ## Frozen Contract
 
 `BASELINE_CONTRACT_HASHES.yaml` records the SHA-256 of the 10 signed V0.1 contract files. CI recomputes and compares them on every run; **any unauthorized byte change fails the gate**.
 
 A real semantic change requires an RFC, regression-impact review and a **new baseline version**, with the hash manifest updated in the same reviewed change.
+
+Package-internal copies under `src/human_cos/_resources/` are transport resources only. Regression tests require them to remain byte-identical to the repository-root canonical originals.
 
 ## Key invariants
 

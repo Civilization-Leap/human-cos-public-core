@@ -1,17 +1,8 @@
 """Frozen-contract verification — the outer immutability gate for V0.1.
 
-Human-COS's "unchangeable semantics" are only trustworthy if CI can prove the
-frozen artifacts did not change byte-for-byte.  This module implements the
-S0 review recommendation (P0-3):
-
-- ``BASELINE_CONTRACT_HASHES.yaml`` lists the SHA-256 of the 10 signed files
-  (the Protocol Registry + all 9 core JSON Schemas).
-- ``assert_frozen_contracts_intact`` recomputes every hash and fails the build
-  on ANY byte change, deletion, or addition to those files.
-
-Rule is deliberately simple and non-heuristic: a frozen contract is immutable.
-Real semantic change requires an RFC + regression impact review + a NEW
-baseline version, which updates this manifest in the same reviewed change.
+Repository-root files remain the canonical signed contract. Installed wheels
+carry byte-identical transport copies and can verify those copies without a
+source checkout.
 """
 
 from __future__ import annotations
@@ -23,16 +14,15 @@ from typing import Any, cast
 
 import yaml
 
-_MODULE_DIR = Path(__file__).resolve().parent
-# src/human_cos/protocols -> 2 up from the module dir = repository root
-_REPO_ROOT = _MODULE_DIR.parents[2]
+from human_cos.resources import read_runtime_resource_bytes, read_runtime_resource_text
 
+_MODULE_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _MODULE_DIR.parents[2]
 DEFAULT_MANIFEST_NAME = "BASELINE_CONTRACT_HASHES.yaml"
 
 
 class ContractHashMismatchError(ValueError):
-    """Raised when a signed frozen-contract file is missing or differs from its
-    recorded SHA-256."""
+    """Raised when a signed frozen-contract file is missing or differs from its hash."""
 
 
 @dataclass
@@ -71,75 +61,107 @@ def default_manifest_path() -> Path:
     return _REPO_ROOT / DEFAULT_MANIFEST_NAME
 
 
+def _validate_manifest(document: Any) -> dict[str, Any]:
+    if not isinstance(document, dict):
+        raise ContractHashMismatchError("frozen contract manifest must be a mapping")
+    files = document.get("files")
+    if not isinstance(files, list) or not files:
+        raise ContractHashMismatchError("frozen contract manifest has no 'files' list")
+    if document.get("version") != "V0.1":
+        raise ContractHashMismatchError(
+            f"frozen contract manifest version {document.get('version')!r} != V0.1"
+        )
+    return cast("dict[str, Any]", document)
+
+
 def _load_manifest(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise ContractHashMismatchError(
             f"frozen contract manifest not found: {path} (file: {DEFAULT_MANIFEST_NAME})"
         )
     with path.open("r", encoding="utf-8") as fh:
-        manifest = yaml.safe_load(fh) or {}
-    files = manifest.get("files")
-    if not isinstance(files, list) or not files:
-        raise ContractHashMismatchError("frozen contract manifest has no 'files' list")
-    if manifest.get("version") != "V0.1":
-        raise ContractHashMismatchError(
-            f"frozen contract manifest version {manifest.get('version')!r} != V0.1"
-        )
-    return cast("dict[str, Any]", manifest)
+        return _validate_manifest(yaml.safe_load(fh) or {})
+
+
+def _load_bundled_manifest() -> dict[str, Any]:
+    try:
+        text = read_runtime_resource_text(DEFAULT_MANIFEST_NAME, prefer_source=False)
+    except FileNotFoundError as exc:
+        raise ContractHashMismatchError("packaged frozen contract manifest not found") from exc
+    return _validate_manifest(yaml.safe_load(text) or {})
 
 
 def compute_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def verify_frozen_contracts(
-    root: Path | None = None, manifest_path: Path | None = None
-) -> ContractReport:
-    """Recompute the SHA-256 of every signed file and compare to the manifest.
+def _check_entry(rel: str, expected: str, payload: bytes | None) -> ContractCheck:
+    if payload is None:
+        return ContractCheck(rel, expected, "", ok=False, note="missing signed file")
+    actual = hashlib.sha256(payload).hexdigest()
+    ok = actual == expected
+    return ContractCheck(
+        rel,
+        expected,
+        actual,
+        ok=ok,
+        note="intact" if ok else f"hash mismatch (expected {expected[:12]}… got {actual[:12]}…)",
+    )
 
-    Never raises for a mismatch — it returns a :class:`ContractReport` so the
-    caller can decide how to surface failures.
+
+def verify_frozen_contracts(
+    root: Path | None = None,
+    manifest_path: Path | None = None,
+    *,
+    bundled: bool = False,
+) -> ContractReport:
+    """Verify canonical source files or packaged transport copies.
+
+    Explicit ``root``/``manifest_path`` retain the historical source-tree API.
+    With no explicit path, source bytes are preferred when available; installed
+    distributions transparently fall back to packaged resources. ``bundled=True``
+    forces validation of packaged copies even from a source checkout.
     """
-    root = Path(root or _REPO_ROOT)
-    manifest_path = Path(manifest_path or root / DEFAULT_MANIFEST_NAME)
-    manifest = _load_manifest(manifest_path)
+    path_mode = root is not None or manifest_path is not None
+    source_root = Path(root or _REPO_ROOT)
+    source_manifest = Path(manifest_path or source_root / DEFAULT_MANIFEST_NAME)
+    use_source = path_mode or (not bundled and source_manifest.is_file())
+    manifest = _load_manifest(source_manifest) if use_source else _load_bundled_manifest()
 
     report = ContractReport()
     for entry in manifest["files"]:
         rel = str(entry["path"])
         expected = str(entry["sha256"]).lower()
-        candidate = root / rel
-        if not candidate.exists():
-            report.items.append(
-                ContractCheck(rel, expected, "", ok=False, note="missing signed file")
-            )
-            continue
-        actual = compute_sha256(candidate)
-        ok = actual == expected
-        report.items.append(
-            ContractCheck(
-                rel,
-                expected,
-                actual,
-                ok=ok,
-                note="intact"
-                if ok
-                else f"hash mismatch (expected {expected[:12]}… got {actual[:12]}…)",
-            )
-        )
-
-    # Missing signed files are already reported above (ok=False).  Whether the
-    # repository carries *extra* contract-shaped files beyond the signed set is
-    # asserted by the unit tests (test_signed_set_is_exactly_the_10_expected_files).
+        payload: bytes | None
+        if use_source:
+            candidate = source_root / rel
+            payload = candidate.read_bytes() if candidate.exists() else None
+        else:
+            try:
+                payload = read_runtime_resource_bytes(rel, prefer_source=False)
+            except FileNotFoundError:
+                payload = None
+        report.items.append(_check_entry(rel, expected, payload))
     return report
+
+
+def verify_bundled_frozen_contracts() -> ContractReport:
+    """Force verification of distribution transport copies."""
+    return verify_frozen_contracts(bundled=True)
 
 
 def assert_frozen_contracts_intact(
-    root: Path | None = None, manifest_path: Path | None = None
+    root: Path | None = None,
+    manifest_path: Path | None = None,
+    *,
+    bundled: bool = False,
 ) -> ContractReport:
-    """Verify the frozen contracts; raise :class:`ContractHashMismatchError`
-    if any signed file is missing, changed, or inconsistent.  Merge-blocking."""
-    report = verify_frozen_contracts(root=root, manifest_path=manifest_path)
+    report = verify_frozen_contracts(root=root, manifest_path=manifest_path, bundled=bundled)
     if not report.ok:
         raise ContractHashMismatchError("FROZEN CONTRACT VIOLATION — " + report.summary())
     return report
+
+
+def assert_bundled_frozen_contracts_intact() -> ContractReport:
+    """Merge-/distribution-gate helper for packaged copies."""
+    return assert_frozen_contracts_intact(bundled=True)
