@@ -93,6 +93,25 @@ class Registry:
         return {p.id: p for p in self.protocols}
 
 
+class RegistrySnapshot(dict[str, ProtocolEntry]):
+    """Backward-compatible registry snapshot with registry-level metadata.
+
+    The object remains a ``dict[str, ProtocolEntry]`` for callers that already
+    consume protocol entries as a mapping, while preserving the registry-level
+    fields required by the strict no-unblessed-change gate.
+    """
+
+    registry_version: str
+    registry_status: str
+    change_control: str
+
+    def __init__(self, registry: Registry) -> None:
+        super().__init__(registry.by_id())
+        self.registry_version = registry.version
+        self.registry_status = registry.status
+        self.change_control = registry.change_control
+
+
 @dataclass
 class RegistryChange:
     """Outcome of diffing two registries, used for no-silent-mutation checks."""
@@ -102,6 +121,7 @@ class RegistryChange:
     added: list[str] = field(default_factory=list)
     removed: list[str] = field(default_factory=list)
     silent_mutations: list[str] = field(default_factory=list)
+    registry_metadata_changes: list[str] = field(default_factory=list)
 
     @property
     def is_clean(self) -> bool:
@@ -115,6 +135,7 @@ class RegistryChange:
             or self.added
             or self.removed
             or self.silent_mutations
+            or self.registry_metadata_changes
         )
 
 
@@ -247,9 +268,9 @@ def _validate_schema(registry: dict[str, Any]) -> None:
 # --- Change control: no silent mutation ---------------------------------------
 
 
-def snapshot(registry: Registry) -> dict[str, ProtocolEntry]:
-    """Return a stable id->entry map usable as a baseline snapshot."""
-    return registry.by_id()
+def snapshot(registry: Registry) -> RegistrySnapshot:
+    """Return a stable protocol mapping plus registry-level baseline metadata."""
+    return RegistrySnapshot(registry)
 
 
 def detect_change(previous: dict[str, ProtocolEntry], current: Registry) -> RegistryChange:
@@ -258,10 +279,26 @@ def detect_change(previous: dict[str, ProtocolEntry], current: Registry) -> Regi
     Raises nothing by itself; the caller decides whether the change is allowed.
     Semantic fields (status/purpose/merge_blocking_tests) changing while the
     *version stays identical* are flagged as ``silent_mutations`` because under
-    I-19 a semantic change requires a version bump + RFC.
+    I-19 a semantic change requires a version bump + RFC. Snapshots created by
+    ``snapshot()`` also retain registry_version, status, and change_control so
+    the strict gate cannot silently miss changes above the protocol-entry level.
     """
     change = RegistryChange()
     current_map = current.by_id()
+
+    if isinstance(previous, RegistrySnapshot):
+        if previous.registry_version != current.version:
+            change.registry_metadata_changes.append(
+                f"registry_version: {previous.registry_version} -> {current.version}"
+            )
+        if previous.registry_status != current.status:
+            change.registry_metadata_changes.append(
+                f"status: {previous.registry_status} -> {current.status}"
+            )
+        if previous.change_control != current.change_control:
+            change.registry_metadata_changes.append(
+                f"change_control: {previous.change_control} -> {current.change_control}"
+            )
 
     for pid in sorted(current_map.keys() - previous.keys()):
         change.added.append(pid)
@@ -291,9 +328,10 @@ def assert_no_silent_mutation(
     - a version *downgrade* (never benign for a FROZEN protocol);
     - *removal* of a protocol that existed in the previous snapshot.
 
-    A version *bump* or *addition* is reported but not rejected here (they
-    cannot silently alter existing frozen semantics); the frozen-contract hash
-    gate blocks them from the signed files.  Returns the change record otherwise.
+    A version *bump*, *addition*, or explicit registry-level metadata change is
+    reported but not rejected here; callers needing byte-for-byte baseline
+    equivalence must use ``assert_no_unblessed_change``. The frozen-contract
+    hash gate independently protects the signed contract files.
     """
     change = detect_change(previous, current)
     faults: list[str] = []
@@ -316,9 +354,9 @@ def assert_no_unblessed_change(
     """Strict gate for a FROZEN contract: raise unless the registry matches the
     previous snapshot exactly.
 
-    Any addition, removal, version bump, version downgrade, or silent semantic
-    change is rejected.  Encodes the S0 review rule that deleting, downgrading,
-    modifying, or adding frozen protocols must never be silently accepted by an
+    Any registry-level metadata change, addition, removal, version bump,
+    version downgrade, or silent semantic change is rejected. Encodes the S0
+    review rule that a frozen registry must never be silently altered by an
     ordinary PR; real change requires RFC + regression impact review + a NEW
     baseline version (a new snapshot).
     """
@@ -326,6 +364,8 @@ def assert_no_unblessed_change(
     if change.is_empty:
         return change
     parts: list[str] = []
+    if change.registry_metadata_changes:
+        parts.append("registry metadata " + ", ".join(change.registry_metadata_changes))
     if change.added:
         parts.append("added " + ", ".join(change.added))
     if change.removed:
