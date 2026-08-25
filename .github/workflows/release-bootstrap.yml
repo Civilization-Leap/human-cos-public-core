@@ -1,0 +1,270 @@
+name: Public Core Hardened Snapshot Rebuild
+
+on:
+  push:
+    branches:
+      - release/public-core-s0-s1-v1
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild-hardened-publication:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Verify hardened source anchor and publication boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'da2c62e21871e911ab26b877928676bc81056e09' README.md
+          grep -q 'da2c62e21871e911ab26b877928676bc81056e09' PUBLIC_PROVENANCE.md
+          grep -q 'da2c62e21871e911ab26b877928676bc81056e09' PUBLIC_SCOPE.md
+          grep -q 'da2c62e21871e911ab26b877928676bc81056e09' RELEASE_STATUS.md
+          test ! -e .release
+          test ! -e 00_MASTER_HANDOFF_PROMPT.md
+          test ! -e 11_BASELINE_FREEZE.yaml
+
+      - name: Regenerate publication safety scan and manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('.')
+          workflow = '.github/workflows/release-bootstrap.yml'
+          manifest_name = 'PUBLIC_CORE_MANIFEST.json'
+          manifest_sha_name = 'PUBLIC_CORE_MANIFEST.sha256'
+          safety_name = 'PUBLICATION_SAFETY_SCAN.json'
+
+          hard_excluded = {
+              '.github/CODEOWNERS.example',
+              '00_MASTER_HANDOFF_PROMPT.md',
+              '11_BASELINE_FREEZE.yaml',
+              'LICENSE_DECISION.md',
+              'PUBLICATION_DECISIONS.md',
+              'SECURITY_PUBLICATION_GATE.md',
+              '.github/publication/build_public_core_snapshot.py',
+          }
+          for path in sorted(hard_excluded):
+              if (root / path).exists():
+                  raise SystemExit(f'excluded publication path present: {path}')
+
+          def all_files() -> list[Path]:
+              return sorted(
+                  p for p in root.rglob('*')
+                  if p.is_file() and '.git' not in p.parts
+              )
+
+          scan_skip = {workflow, manifest_name, manifest_sha_name, safety_name}
+          rules = {
+              'private_key': re.compile(rb'-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----'),
+              'github_token': re.compile(rb'gh[pousr]_[A-Za-z0-9_]{20,}'),
+              'aws_access_key': re.compile(rb'AKIA[0-9A-Z]{16}'),
+              'openai_style_secret': re.compile(rb'\bsk-[A-Za-z0-9_-]{20,}\b'),
+              'slack_token': re.compile(rb'\bxox[baprs]-[A-Za-z0-9-]{10,}\b'),
+              'internal_container_path': re.compile(rb'/(?:mnt/data|home/oai|Users/[^/\s]+)/'),
+              'private_ipv4': re.compile(
+                  rb'(?<![0-9])(?:10\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}|'
+                  rb'192\.168\.(?:[0-9]{1,3}\.)[0-9]{1,3}|'
+                  rb'172\.(?:1[6-9]|2[0-9]|3[01])\.(?:[0-9]{1,3}\.)[0-9]{1,3})(?![0-9])'
+              ),
+          }
+
+          findings: list[dict[str, str]] = []
+          scanned = 0
+          for path in all_files():
+              rel = str(path.relative_to(root))
+              if rel in scan_skip:
+                  continue
+              data = path.read_bytes()
+              scanned += 1
+              for rule, pattern in rules.items():
+                  if pattern.search(data):
+                      findings.append({'path': rel, 'rule': rule})
+
+          safety = {
+              'status': 'PASS' if not findings else 'FAIL',
+              'findings': findings,
+              'files_scanned': scanned,
+              'source_commit': 'da2c62e21871e911ab26b877928676bc81056e09',
+              'scan_scope': 'public-core hardened candidate excluding manifest/self-generated scan and one-time workflow',
+          }
+          (root / safety_name).write_text(
+              json.dumps(safety, ensure_ascii=False, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          if findings:
+              print(json.dumps(findings, ensure_ascii=False, indent=2))
+              raise SystemExit('publication safety scan failed')
+
+          excluded_from_manifest = {workflow, manifest_name, manifest_sha_name}
+          entries: list[dict[str, object]] = []
+          for path in all_files():
+              rel = str(path.relative_to(root))
+              if rel in excluded_from_manifest:
+                  continue
+              data = path.read_bytes()
+              entries.append({
+                  'bytes': len(data),
+                  'path': rel,
+                  'sha256': hashlib.sha256(data).hexdigest(),
+              })
+
+          manifest = {
+              'schema_version': '1.1',
+              'project': 'Human-COS Public Core',
+              'source_repository': 'Civilization-Leap/human-cos-runtime',
+              'source_commit': 'da2c62e21871e911ab26b877928676bc81056e09',
+              'publication_staging_commit': '948e5b2a6a41df8946f9cd015b3b414ec39af9b1',
+              'publication_hardening_pr': 4,
+              'publication_hardening_commit': 'da2c62e21871e911ab26b877928676bc81056e09',
+              'prior_candidate_superseded': True,
+              'target_repository': 'Civilization-Leap/human-cos-public-core',
+              'release_scope': 'S0/S1',
+              'copyright_holder': 'ZhongXinWang',
+              'chinese_name': '王忠新',
+              'pen_name': '子君赋',
+              'license': 'Apache-2.0',
+              'pvr_verified': True,
+              'private_git_history_included': False,
+              'excluded_paths': sorted(hard_excluded),
+              'files': entries,
+          }
+          manifest_bytes = (
+              json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + '\n'
+          ).encode('utf-8')
+          (root / manifest_name).write_bytes(manifest_bytes)
+          manifest_sha = hashlib.sha256(manifest_bytes).hexdigest()
+          (root / manifest_sha_name).write_text(
+              f'{manifest_sha}  {manifest_name}\n', encoding='utf-8'
+          )
+
+          print(f'Publication safety scan: PASS ({scanned} files scanned)')
+          print(f'Manifest entries: {len(entries)}')
+          print(f'Manifest SHA-256: {manifest_sha}')
+          if len(entries) != 72:
+              raise SystemExit(f'hardened manifest entry count drift: {len(entries)} != 72')
+          PY
+
+      - name: Verify manifest and exact final tree model
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum -c PUBLIC_CORE_MANIFEST.sha256
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          manifest = json.loads((root / 'PUBLIC_CORE_MANIFEST.json').read_text(encoding='utf-8'))
+          bad = []
+          for item in manifest['files']:
+              p = root / item['path']
+              if not p.is_file():
+                  bad.append((item['path'], 'missing'))
+                  continue
+              data = p.read_bytes()
+              if len(data) != item['bytes']:
+                  bad.append((item['path'], f'bytes={len(data)} expected={item["bytes"]}'))
+                  continue
+              got = hashlib.sha256(data).hexdigest()
+              if got != item['sha256']:
+                  bad.append((item['path'], f'sha256={got} expected={item["sha256"]}'))
+          if bad:
+              print(bad)
+              raise SystemExit('manifest content verification failed')
+
+          expected = {item['path'] for item in manifest['files']}
+          expected |= {'PUBLIC_CORE_MANIFEST.json', 'PUBLIC_CORE_MANIFEST.sha256'}
+          actual = {
+              str(p.relative_to(root))
+              for p in root.rglob('*')
+              if p.is_file()
+              and '.git' not in p.parts
+              and str(p.relative_to(root)) != '.github/workflows/release-bootstrap.yml'
+          }
+          missing = sorted(expected - actual)
+          extra = sorted(actual - expected)
+          if missing or extra:
+              print('missing=', missing)
+              print('extra=', extra)
+              raise SystemExit('final tree path mismatch')
+          if len(actual) != 74:
+              raise SystemExit(f'final tree file count drift: {len(actual)} != 74')
+          print('Manifest content: PASS (72/72)')
+          print('Final tree paths: PASS (74/74)')
+          PY
+
+      - name: Build deterministic hardened clean snapshot artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import zipfile
+          from pathlib import Path
+
+          root = Path('.')
+          manifest = json.loads((root / 'PUBLIC_CORE_MANIFEST.json').read_text(encoding='utf-8'))
+          paths = sorted([item['path'] for item in manifest['files']] + [
+              'PUBLIC_CORE_MANIFEST.json',
+              'PUBLIC_CORE_MANIFEST.sha256',
+          ])
+          out = Path('/tmp/human-cos-public-core_hardened_final_clean_snapshot.zip')
+          with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+              for rel in paths:
+                  data = (root / rel).read_bytes()
+                  info = zipfile.ZipInfo(rel, date_time=(1980, 1, 1, 0, 0, 0))
+                  info.compress_type = zipfile.ZIP_DEFLATED
+                  info.external_attr = 0o100644 << 16
+                  zf.writestr(info, data, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
+          snapshot_sha = hashlib.sha256(out.read_bytes()).hexdigest()
+          manifest_sha = hashlib.sha256((root / 'PUBLIC_CORE_MANIFEST.json').read_bytes()).hexdigest()
+          evidence = {
+              'source_commit': 'da2c62e21871e911ab26b877928676bc81056e09',
+              'manifest_sha256': manifest_sha,
+              'snapshot_sha256': snapshot_sha,
+              'manifest_entries': 72,
+              'final_files': 74,
+              'safety_status': 'PASS',
+          }
+          Path('/tmp/HARDENED_RELEASE_EVIDENCE.json').write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(evidence, indent=2, sort_keys=True))
+          PY
+
+      - name: Remove one-time workflow and commit regenerated publication records
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/release-bootstrap.yml
+          git config user.name 'Civilization-Leap'
+          git config user.email 'actions@users.noreply.github.com'
+          git add PUBLICATION_SAFETY_SCAN.json PUBLIC_CORE_MANIFEST.json PUBLIC_CORE_MANIFEST.sha256 .github/workflows/release-bootstrap.yml
+          git diff --cached --name-status
+          git commit -m 'release(public-core): freeze hardened S0/S1 manifest and safety record'
+          git push origin HEAD:release/public-core-s0-s1-v1
+
+      - name: Upload hardened release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: human-cos-public-core-hardened-release-candidate
+          path: |
+            /tmp/human-cos-public-core_hardened_final_clean_snapshot.zip
+            /tmp/HARDENED_RELEASE_EVIDENCE.json
+          if-no-files-found: error
+          retention-days: 30
