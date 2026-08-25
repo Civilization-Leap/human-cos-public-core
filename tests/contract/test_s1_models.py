@@ -40,5 +40,5 @@ def test_nested_visibility_is_deeply_immutable(evidence_factory) -> None:
 def test_temporal_contract_rejects_naive_datetime(evidence_factory) -> None:
     doc = evidence_factory("e-naive")
     doc["available_from"] = "2025-12-01T00:00:00"
-    with pytest.raises(ValidationError, match="timezone-aware"):
+    with pytest.raises(ContractValidationError, match="date-time"):
         parse_evidence(doc)
