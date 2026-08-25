@@ -27,9 +27,11 @@ Not implemented in this Public Core:
 
 ## Publication provenance
 
-Initial Public Core source anchor:
+Current Public Core source anchor:
 
-`Civilization-Leap/human-cos-runtime@c48b630d98339a6a7a0ddec68926071420e699c5`
+`Civilization-Leap/human-cos-runtime@da2c62e21871e911ab26b877928676bc81056e09`
+
+This source anchor includes the S1 pre-publication hardening merged in private PR #4: enforcement of already-declared JSON Schema `date-time` formats and registry-level metadata coverage in the strict Frozen Registry change guard. The Protocol Registry YAML, all 9 Frozen Schemas and `BASELINE_CONTRACT_HASHES.yaml` remain unchanged.
 
 Public repository:
 
@@ -81,6 +83,8 @@ docker run --rm human-cos-runtime:s1 pytest -q
 ```
 
 PostgreSQL-backed integration tests require `HUMAN_COS_TEST_DATABASE_URL`; the GitHub Actions workflow supplies a disposable PostgreSQL 16 service.
+
+The initial Public Core release supports **source checkout + editable installation** and source-tree/Docker reproduction. It does not currently claim wheel/PyPI/non-editable installation support; that packaging hardening is tracked separately in Issue #4.
 
 ## Frozen Contract
 
