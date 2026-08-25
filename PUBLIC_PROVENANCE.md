@@ -1,6 +1,6 @@
 # Human-COS Public Core — Provenance
 
-Status: **INITIAL PUBLIC CORE RELEASE LINEAGE FROZEN; PACKAGING MAINTENANCE PROTECTED-MAIN LINEAGE VERIFIED**
+Status: **INITIAL PUBLIC CORE RELEASE LINEAGE FROZEN; PACKAGING MAINTENANCE AND POST-MERGE CLOSURE VERIFIED**
 
 ## Private source anchors
 
@@ -69,6 +69,24 @@ The maintenance projection preserves the Public Core publication overlay:
 
 Final base-to-head audit for PR #6 confirmed zero changes to the repository-root Protocol Registry, all 9 repository-root Frozen Schemas, `BASELINE_CONTRACT_HASHES.yaml`, `uv.lock`, `PUBLIC_CORE_MANIFEST.json`, and `PUBLIC_CORE_MANIFEST.sha256`.
 
+## Post-merge closure lineage
+
+The maintenance evidence was finalized through a separate protected-main metadata closure:
+
+- Metadata closure PR: `#7` — `Post-merge packaging maintenance provenance closure`
+- Final reviewed metadata PR head: `c2cc35d1bc48cd5f2ad715b5781bdad50df334ae`
+- Protected-main closure metadata commit: `a56d132c3353c71fd249ba1b9d2a83d01452176a`
+- Protected-main closure metadata tree: `972d95338f61ae907ce82646cd41cddffa6a2fd0`
+- Metadata PR CI run `#27`: **SUCCESS**
+- protected-main push CI run `#28`: **SUCCESS**
+- required `test (3.10)`: **PASS**
+- required `test (3.12)`: **PASS**
+- wheel build and clean non-editable installed-distribution validation: **PASS**
+- Frozen Contract gates: **PASS**
+- secret scan and Docker build: **PASS**
+
+This closure commit is administrative metadata only. It is not a new Runtime release, does not replace the packaging-maintenance commit, and does not redefine the initial frozen release identity.
+
 ## Public legal and installation state
 
 - Legal copyright holder: **ZhongXinWang** (王忠新; pen name: 子君赋)
@@ -79,11 +97,21 @@ Final base-to-head audit for PR #6 confirmed zero changes to the repository-root
 - Runtime checkout is not required after that wheel is installed for bundled Registry, schema/Frozen Contract verification, or bundled migrations.
 - PyPI publication: **not claimed**.
 
-## Issue #4 closure evidence
+## Issue #4 closure evidence — completed
 
-The engineering closure gate defined in public Issue #4 is satisfied by the canonical private merge, Public PR #6, protected-main maintenance commit/tree, PR CI #25, protected-main CI #26, installed-distribution tests, and the installation contract documented in `README.md`.
+Public Issue #4 (`Packaging hardening: support non-editable/wheel installs for contract assets`) is **CLOSED / COMPLETED**.
 
-Issue #4 remains open until this post-merge provenance update itself is merged and verified on protected `main`. Its later closure records completion of the packaging-maintenance work only; it does not create a new Runtime semantic baseline, rewrite the initial public release identity, or authorize S2.
+Its engineering and administrative closure gates are satisfied by:
+
+- canonical private merge at `human-cos-runtime@4098a69817d220634b156fab12ee3d664d504e8e`;
+- Public PR #6 and protected-main packaging maintenance commit/tree;
+- PR CI #25 and protected-main CI #26;
+- clean non-editable installed-distribution validation and Frozen Contract 10/10 verification;
+- the installation contract documented in `README.md`;
+- metadata PR #7 and protected-main closure metadata commit/tree;
+- metadata PR CI #27 and protected-main CI #28.
+
+Issue #4 was closed as completed after all of those conditions were verified. Its closure records completion of S0/S1 packaging/distribution hardening only; it does not create a new Runtime semantic baseline, rewrite the initial public release identity, or authorize S2.
 
 ## Engineering lineage
 
@@ -94,6 +122,7 @@ The public lineage remains verifiable through:
 - the exact private source anchors above;
 - the exact protected-main initial release commit and tree above;
 - the exact protected-main packaging-maintenance commit and tree above;
+- the exact protected-main closure metadata commit and tree above;
 - `BASELINE_CONTRACT_HASHES.yaml`;
 - Frozen Protocol Registry + 9 Frozen Schemas;
 - package-resource byte-identity tests;
@@ -122,7 +151,7 @@ Public packaging maintenance does not silently revise the Frozen Protocol or Fro
 
 ## Post-merge metadata boundary
 
-This provenance update records already-verified maintenance evidence. Its own eventual protected-main merge commit is administrative metadata only and is not a new Runtime release or a replacement for the packaging-maintenance commit above.
+The post-merge provenance closure records already-verified maintenance evidence. Its protected-main commit `a56d132c3353c71fd249ba1b9d2a83d01452176a` is administrative metadata only and is not a new Runtime release or a replacement for the packaging-maintenance commit above.
 
 ## Authority boundary
 

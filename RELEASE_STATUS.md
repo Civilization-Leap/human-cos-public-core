@@ -80,6 +80,37 @@ Validation evidence:
 
 Final base-to-head audit confirmed zero changes to the repository-root Protocol Registry, all 9 repository-root Frozen Schemas, `BASELINE_CONTRACT_HASHES.yaml`, `uv.lock`, `PUBLIC_CORE_MANIFEST.json`, and `PUBLIC_CORE_MANIFEST.sha256`. Package-internal `_resources` files are distribution transport copies only and do not establish a second semantic baseline.
 
+## Post-merge provenance closure — protected-main record
+
+Metadata closure PR:
+
+`human-cos-public-core#7` — `Post-merge packaging maintenance provenance closure`
+
+Final reviewed metadata PR head:
+
+`c2cc35d1bc48cd5f2ad715b5781bdad50df334ae`
+
+Protected-main closure metadata commit:
+
+`a56d132c3353c71fd249ba1b9d2a83d01452176a`
+
+Protected-main closure metadata tree:
+
+`972d95338f61ae907ce82646cd41cddffa6a2fd0`
+
+Closure validation evidence:
+
+- metadata PR CI run `#27`: **SUCCESS**;
+- protected-main push CI run `#28`: **SUCCESS**;
+- required `test (3.10)`: **PASS**;
+- required `test (3.12)`: **PASS**;
+- wheel build and clean non-editable installed-distribution validation: **PASS**;
+- Frozen Contract gates: **PASS**;
+- secret scan: **PASS**;
+- Docker build: **PASS**.
+
+This closure commit is administrative metadata only. It is not a new Runtime semantic baseline and does not replace the packaging-maintenance commit above.
+
 ## Included capability
 
 - Frozen Protocol Registry + 9 Frozen Schemas;
@@ -106,18 +137,22 @@ The packaging maintenance state supports a normal wheel built locally from this 
 
 This maintenance state does not include or authorize S2 or later Runtime capability, model registry/adapters, qualification, full state-machine orchestration, Responsibility Map, No Silent Crossing execution guard, cross-platform federation, or real-world execution.
 
-## Public Issue #4 closure gate
+## Public Issue #4 closure — completed
 
-The functional packaging-hardening closure conditions are now evidenced:
+Issue #4 (`Packaging hardening: support non-editable/wheel installs for contract assets`) is **CLOSED / COMPLETED**.
+
+Its closure gate is fully satisfied:
 
 - canonical private implementation merged and green: **PASS**;
 - clean-wheel/non-editable validation: **PASS**;
 - audited Public Core canonical projection: **PASS**;
 - Public Core protected-main required checks: **PASS**;
 - installed-distribution verification on the public tree: **PASS**;
-- public installation documentation accurately states local wheel/non-editable support and no PyPI claim: **PASS**.
+- public installation documentation accurately states local wheel/non-editable support and no PyPI claim: **PASS**;
+- post-merge metadata closure PR #7 merged through protected `main`: **PASS**;
+- closure metadata protected-main CI run #28: **SUCCESS**.
 
-Issue #4 remains open only until this post-merge metadata closure PR itself is merged through protected `main` and its real `main` CI completes successfully. Closing Issue #4 after that verification is administrative closure; it does not redefine the initial release identity, alter the Frozen Contract, or authorize S2.
+Issue #4 was closed as completed after these conditions were verified. That closure records completion of S0/S1 packaging/distribution hardening only; it does not redefine the initial release identity, alter the Frozen Contract, or authorize S2.
 
 ## Initial publication gates — frozen record
 
@@ -134,6 +169,6 @@ Issue #4 remains open only until this post-merge metadata closure PR itself is m
 
 ## Maintenance and metadata boundary
 
-Packaging maintenance improves distribution reproducibility without redefining the initial release identity or Frozen Contract. This closure metadata records verified evidence only. Any semantic protocol change still requires the separate RFC + regression-impact + new-baseline process.
+Packaging maintenance improves distribution reproducibility without redefining the initial release identity or Frozen Contract. Closure metadata records verified evidence only. Any semantic protocol change still requires the separate RFC + regression-impact + new-baseline process.
 
 The public repository is a reproducibility surface, not an authority over independent professional judgment or real-world decisions.
