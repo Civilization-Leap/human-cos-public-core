@@ -2,7 +2,7 @@
 
 Status: **FROZEN FOR INITIAL PUBLIC CORE RELEASE**
 
-Source anchor: `main@c48b630d98339a6a7a0ddec68926071420e699c5`
+Source anchor: `main@da2c62e21871e911ab26b877928676bc81056e09`
 
 Public Core exists to make the current S0/S1 engineering claims independently inspectable and reproducible. It is not the complete private engineering repository and it is not the authority that defines Human-COS theory.
 
@@ -17,6 +17,8 @@ Public Core exists to make the current S0/S1 engineering claims independently in
 - `BASELINE_CONTRACT_HASHES.yaml`;
 - Frozen Protocol Registry + 9 Frozen Schemas;
 - protocol loader, schema validation and Frozen Contract verification;
+- deterministic enforcement of the `date-time` formats already declared by the Frozen Schemas;
+- strict Frozen Registry change detection including registry-level version/status/change-control metadata;
 - S1 Case/Evidence application models, T0/time boundaries, actor/role ACL, Context admission logic and append-only PostgreSQL storage;
 - S1 forward/rollback migrations;
 - protocol, contract, unit and integration tests needed to reproduce S0/S1 claims;
@@ -39,6 +41,7 @@ The following are not part of this release unless separately reviewed and explic
 - credentials, tokens, secrets, private endpoints, private account identifiers or unpublished contact information;
 - retained case data, private evidence, model outputs, expert submissions or participant information;
 - unpublished research packs and evaluation datasets;
+- wheel/PyPI/non-editable installation support, which is not claimed by the initial source-reproducibility release and is tracked separately in Issue #4;
 - later-sprint implementation not already merged into the fixed source anchor;
 - Responsibility Map / Decision Record Runtime contract;
 - R1–R7 Runtime enums;
