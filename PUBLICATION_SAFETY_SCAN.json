@@ -1,4 +1,7 @@
 {
-  "status": "PASS",
-  "findings": []
+  "files_scanned": 71,
+  "findings": [],
+  "scan_scope": "public-core hardened candidate excluding manifest/self-generated scan and one-time workflow",
+  "source_commit": "da2c62e21871e911ab26b877928676bc81056e09",
+  "status": "PASS"
 }
