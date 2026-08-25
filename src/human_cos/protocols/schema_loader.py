@@ -11,15 +11,51 @@ without network access.
 
 from __future__ import annotations
 
+import calendar
 import json
+import re
+from collections.abc import Callable
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
 _SCHEMA_ROOT = Path(__file__).resolve().parents[3] / "schemas"
+_RFC3339_DATETIME = re.compile(
+    r"^(?P<year>\d{4})-(?P<month>0[1-9]|1[0-2])-(?P<day>\d{2})"
+    r"[Tt](?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?"
+    r"(?:[Zz]|[+-](?:[01]\d|2[0-3]):[0-5]\d)$",
+    re.ASCII,
+)
+_FORMAT_CHECKER = FormatChecker()
+_FormatPredicate = Callable[[object], bool]
+_FormatRegistrar = Callable[[str], Callable[[_FormatPredicate], _FormatPredicate]]
+_REGISTER_FORMAT = cast(_FormatRegistrar, _FORMAT_CHECKER.checks)
+
+
+def _is_rfc3339_datetime(value: object) -> bool:
+    """Validate the RFC3339 date-time shape used by the frozen S0 schemas.
+
+    All current schema ``format`` declarations are ``date-time``. Keeping the
+    checker local makes enforcement deterministic even when jsonschema's
+    optional format extras are not installed.
+    """
+    if not isinstance(value, str):
+        return True
+    match = _RFC3339_DATETIME.fullmatch(value)
+    if match is None:
+        return False
+    year = int(match.group("year"))
+    month = int(match.group("month"))
+    day = int(match.group("day"))
+    if year == 0:
+        return False
+    return 1 <= day <= calendar.monthrange(year, month)[1]
+
+
+_REGISTER_FORMAT("date-time")(_is_rfc3339_datetime)
 
 
 class SchemaNotFoundError(FileNotFoundError):
@@ -58,9 +94,13 @@ def _registry() -> Registry:
 
 def validator_for(name: str) -> Draft202012Validator:
     """Return a Draft-2020-12 validator for the named schema, resolving
-    relative ``$ref`` against the bundled schemas directory."""
+    relative ``$ref`` locally and enforcing declared JSON Schema formats."""
     schema = load_json_schema(name)
-    return Draft202012Validator(schema, registry=_registry())
+    return Draft202012Validator(
+        schema,
+        registry=_registry(),
+        format_checker=_FORMAT_CHECKER,
+    )
 
 
 def validate_instance(instance: dict[str, Any], name: str) -> list[str]:
