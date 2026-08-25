@@ -6,8 +6,10 @@ Status: **INITIAL PUBLIC CORE RELEASE LINEAGE FROZEN**
 
 - Private engineering repository: `Civilization-Leap/human-cos-runtime`
 - Source branch: `main`
-- Source commit: `c48b630d98339a6a7a0ddec68926071420e699c5`
-- Source state: Sprint S1 merged; later Runtime sprints are neither included nor authorized by this publication work.
+- Source commit: `da2c62e21871e911ab26b877928676bc81056e09`
+- Source state: Sprint S1 merged plus pre-publication S0/S1 hardening from private PR #4; later Runtime sprints are neither included nor authorized by this publication work.
+
+The hardening commit makes already-declared JSON Schema `date-time` formats enforceable and closes a strict Frozen Registry guard gap for registry-level metadata. It does **not** change the Protocol Registry YAML, any of the 9 Frozen Schemas, or `BASELINE_CONTRACT_HASHES.yaml`.
 
 ## Public release target
 
@@ -18,7 +20,7 @@ Status: **INITIAL PUBLIC CORE RELEASE LINEAGE FROZEN**
 
 ## Engineering lineage
 
-The private source repository contains the recovered S0/PATCH-1 engineering baseline and merged S1 implementation. Public Core does **not** reproduce the full private Git history or private-only handoff/freeze-control records.
+The private source repository contains the recovered S0/PATCH-1 engineering baseline, merged S1 implementation and the publication-hardening merge identified above. Public Core does **not** reproduce the full private Git history or private-only handoff/freeze-control records.
 
 The public release preserves verifiable lineage through:
 
