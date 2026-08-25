@@ -1,6 +1,6 @@
 # Human-COS Public Core — Provenance
 
-Status: **INITIAL PUBLIC CORE RELEASE LINEAGE FROZEN; PACKAGING MAINTENANCE LINEAGE RECORDED**
+Status: **INITIAL PUBLIC CORE RELEASE LINEAGE FROZEN; PACKAGING MAINTENANCE PROTECTED-MAIN LINEAGE VERIFIED**
 
 ## Private source anchors
 
@@ -40,16 +40,34 @@ These hashes identify the **initial protected-main source release only**. The in
 
 ## Packaging-hardening public maintenance lineage
 
-The current maintenance projection is derived from canonical private `human-cos-runtime@4098a69817d220634b156fab12ee3d664d504e8e` and preserves the Public Core publication overlay:
+The audited public projection of canonical private `human-cos-runtime@4098a69817d220634b156fab12ee3d664d504e8e` was merged through protected `main` as:
+
+- Public maintenance PR: `#6` — `Public Core packaging hardening — audited canonical projection`
+- Final reviewed PR head: `0c18ee535c594a4c48a2831bcf6842569f58c9c5`
+- Protected-main maintenance commit: `117d3e28bf633c4726f1a42c5a4575a0da9974a5`
+- Protected-main maintenance tree: `8bf6fdfbc9cc123010df6e760c7a40ae440598be`
+- PR CI run `#25`: **SUCCESS**
+- protected-main push CI run `#26`: **SUCCESS**
+- required `test (3.10)`: **PASS**
+- required `test (3.12)`: **PASS**
+- clean non-editable wheel validation on both Python versions: **PASS**
+- packaged Frozen Contract verification: **10/10 PASS**
+- installed-distribution JSON Schema `date-time` enforcement: **PASS**
+- installed-distribution PostgreSQL S1 forward/rollback migrations: **PASS**
+- secret scan and Docker build: **PASS**
+- unresolved PR review threads at merge: **0**
+
+The maintenance projection preserves the Public Core publication overlay:
 
 - Apache License 2.0 remains the public license;
 - ZhongXinWang / 王忠新 / 子君赋 attribution remains public metadata;
 - private Git history and private-only control files remain excluded;
 - root Frozen Contract artifacts remain the canonical signed originals;
 - package-internal `_resources` copies are transport artifacts only and must remain byte-identical to those originals;
+- `BASELINE_CONTRACT_HASHES.yaml` and `uv.lock` remain unchanged;
 - `PUBLIC_CORE_MANIFEST.json` and its recorded SHA remain the frozen initial-release manifest, not a mutable current-tree manifest.
 
-The protected-main commit that lands this maintenance state is intentionally recorded after merge as closure evidence; it is not guessed or predeclared in this branch. Public Issue #4 remains open until that commit, the required public checks and installed-distribution evidence are confirmed.
+Final base-to-head audit for PR #6 confirmed zero changes to the repository-root Protocol Registry, all 9 repository-root Frozen Schemas, `BASELINE_CONTRACT_HASHES.yaml`, `uv.lock`, `PUBLIC_CORE_MANIFEST.json`, and `PUBLIC_CORE_MANIFEST.sha256`.
 
 ## Public legal and installation state
 
@@ -58,7 +76,14 @@ The protected-main commit that lands this maintenance state is intentionally rec
 - Security reporting: GitHub Private Vulnerability Reporting, enabled and externally verified before Runtime source upload.
 - Initial release installation contract: source checkout + editable install + source-tree/Docker reproduction.
 - Packaging maintenance installation contract: source checkout plus locally built normal wheel/non-editable installation, with contract and migration resources included.
+- Runtime checkout is not required after that wheel is installed for bundled Registry, schema/Frozen Contract verification, or bundled migrations.
 - PyPI publication: **not claimed**.
+
+## Issue #4 closure evidence
+
+The engineering closure gate defined in public Issue #4 is satisfied by the canonical private merge, Public PR #6, protected-main maintenance commit/tree, PR CI #25, protected-main CI #26, installed-distribution tests, and the installation contract documented in `README.md`.
+
+Issue #4 remains open until this post-merge provenance update itself is merged and verified on protected `main`. Its later closure records completion of the packaging-maintenance work only; it does not create a new Runtime semantic baseline, rewrite the initial public release identity, or authorize S2.
 
 ## Engineering lineage
 
@@ -68,7 +93,7 @@ The public lineage remains verifiable through:
 
 - the exact private source anchors above;
 - the exact protected-main initial release commit and tree above;
-- the later protected-main maintenance commit once recorded after merge;
+- the exact protected-main packaging-maintenance commit and tree above;
 - `BASELINE_CONTRACT_HASHES.yaml`;
 - Frozen Protocol Registry + 9 Frozen Schemas;
 - package-resource byte-identity tests;
@@ -94,6 +119,10 @@ The Public Core does not transfer:
 ## Frozen Contract relationship
 
 Public packaging maintenance does not silently revise the Frozen Protocol or Frozen Schemas. Any semantic change follows the Runtime RFC + regression-impact + new-baseline rule. A fork may independently modify its own implementation, but it must not claim byte-equivalence with the frozen Human-COS baseline unless the contract hashes actually match.
+
+## Post-merge metadata boundary
+
+This provenance update records already-verified maintenance evidence. Its own eventual protected-main merge commit is administrative metadata only and is not a new Runtime release or a replacement for the packaging-maintenance commit above.
 
 ## Authority boundary
 
