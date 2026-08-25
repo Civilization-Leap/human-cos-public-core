@@ -34,26 +34,51 @@ Frozen `uv.lock` SHA-256:
 
 The snapshot and manifest hashes above belong exclusively to the **initial protected-main release commit**. They are historical frozen identities and must not be recalculated or replaced because of later maintenance work.
 
-## Subsequent packaging-hardening maintenance state
+## Packaging-hardening maintenance — protected-main record
 
 Canonical private maintenance source anchor:
 
 `Civilization-Leap/human-cos-runtime@4098a69817d220634b156fab12ee3d664d504e8e`
 
-Canonical private PR: `human-cos-runtime#5` — S1 packaging hardening: installed resource-safe wheel support.
+Canonical private PR:
 
-This maintenance state adds distribution transport and verification only:
+`human-cos-runtime#5` — `S1 packaging hardening: installed resource-safe wheel support`
 
-- package-internal byte-identical copies of the Frozen Contract manifest, Registry, 9 Schemas and S1 migrations;
-- installed-resource-safe loading via Python package resources;
-- bundled-registry CLI fallback when no repository path is supplied;
-- packaged-resource byte-identity regression gates;
-- normal wheel build and clean non-editable installation validation outside the repository;
-- installed-distribution verification of Registry loading, JSON Schema `date-time` enforcement, Frozen Contract 10/10, and PostgreSQL S1 forward/rollback migrations.
+Audited Public Core projection PR:
 
-It does **not** change the Frozen Contract, `BASELINE_CONTRACT_HASHES.yaml`, `uv.lock`, the S0/S1 Runtime semantic baseline, or S2 authorization state.
+`human-cos-public-core#6` — `Public Core packaging hardening — audited canonical projection`
 
-The protected-main public maintenance commit is recorded as post-merge closure evidence rather than guessed in advance. The initial release commit/tree/snapshot/manifest remain unchanged regardless of that later commit.
+Final reviewed public PR head:
+
+`0c18ee535c594a4c48a2831bcf6842569f58c9c5`
+
+Protected-main packaging maintenance commit:
+
+`117d3e28bf633c4726f1a42c5a4575a0da9974a5`
+
+Protected-main packaging maintenance tree:
+
+`8bf6fdfbc9cc123010df6e760c7a40ae440598be`
+
+Validation evidence:
+
+- Public PR CI run `#25`: **SUCCESS**;
+- protected-main push CI run `#26`: **SUCCESS**;
+- required `test (3.10)`: **PASS**;
+- required `test (3.12)`: **PASS**;
+- unit / protocol / Frozen Contract tests: **PASS**;
+- ruff / format / mypy: **PASS**;
+- bundled Protocol Registry CLI: **PASS**;
+- packaged-resource byte-identity gate: **PASS**;
+- Frozen Contract packaged verification: **10/10 PASS**;
+- wheel build: **PASS**;
+- clean non-editable installed-distribution validation outside the repository: **PASS**;
+- installed-distribution JSON Schema `date-time` enforcement: **PASS**;
+- installed-distribution PostgreSQL S1 forward/rollback migrations: **PASS**;
+- secret scan: **PASS**;
+- Docker build: **PASS**.
+
+Final base-to-head audit confirmed zero changes to the repository-root Protocol Registry, all 9 repository-root Frozen Schemas, `BASELINE_CONTRACT_HASHES.yaml`, `uv.lock`, `PUBLIC_CORE_MANIFEST.json`, and `PUBLIC_CORE_MANIFEST.sha256`. Package-internal `_resources` files are distribution transport copies only and do not establish a second semantic baseline.
 
 ## Included capability
 
@@ -71,13 +96,28 @@ The protected-main public maintenance commit is recorded as post-merge closure e
 - source-checkout/editable reproduction;
 - locally built wheel / non-editable installation with bundled contract and migration resources.
 
+## Installation contract
+
+The packaging maintenance state supports a normal wheel built locally from this source tree and installed non-editably without retaining a repository checkout at runtime. CI verifies the installed distribution from outside the repository on Python 3.10 and 3.12.
+
+**PyPI publication is not claimed.** No PyPI release is asserted by this repository.
+
 ## Not included / not authorized
 
 This maintenance state does not include or authorize S2 or later Runtime capability, model registry/adapters, qualification, full state-machine orchestration, Responsibility Map, No Silent Crossing execution guard, cross-platform federation, or real-world execution.
 
-PyPI publication is not claimed. A local wheel built from this source tree is the supported non-editable installation contract for this maintenance state.
+## Public Issue #4 closure gate
 
-Public Issue #4 remains the closure/evidence tracker until the protected-main maintenance commit, public required checks, installed-distribution verification and final provenance record are all confirmed.
+The functional packaging-hardening closure conditions are now evidenced:
+
+- canonical private implementation merged and green: **PASS**;
+- clean-wheel/non-editable validation: **PASS**;
+- audited Public Core canonical projection: **PASS**;
+- Public Core protected-main required checks: **PASS**;
+- installed-distribution verification on the public tree: **PASS**;
+- public installation documentation accurately states local wheel/non-editable support and no PyPI claim: **PASS**.
+
+Issue #4 remains open only until this post-merge metadata closure PR itself is merged through protected `main` and its real `main` CI completes successfully. Closing Issue #4 after that verification is administrative closure; it does not redefine the initial release identity, alter the Frozen Contract, or authorize S2.
 
 ## Initial publication gates — frozen record
 
@@ -92,8 +132,8 @@ Public Issue #4 remains the closure/evidence tracker until the protected-main ma
 - G8 Hardened release validation: **PASS** — manifest 72/72, final tree 74/74, Frozen Contract drift 0/10, public Python 3.10/3.12 required checks passed
 - G9 Formal protected-main publication: **PASS** — initial Public Core source release merged at `b7fd3b42eef257f3c9c8fe5942e09f6606e3756d`
 
-## Maintenance boundary
+## Maintenance and metadata boundary
 
-Subsequent maintenance may improve reproducibility, packaging, tests or documentation without redefining the initial release identity or the Frozen Contract. Any semantic protocol change still requires the separate RFC + regression-impact + new-baseline process.
+Packaging maintenance improves distribution reproducibility without redefining the initial release identity or Frozen Contract. This closure metadata records verified evidence only. Any semantic protocol change still requires the separate RFC + regression-impact + new-baseline process.
 
 The public repository is a reproducibility surface, not an authority over independent professional judgment or real-world decisions.
