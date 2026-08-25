@@ -1,0 +1,389 @@
+{
+  "chinese_name": "王忠新",
+  "copyright_holder": "ZhongXinWang",
+  "excluded_paths": [
+    ".github/CODEOWNERS.example",
+    ".github/publication/build_public_core_snapshot.py",
+    "00_MASTER_HANDOFF_PROMPT.md",
+    "11_BASELINE_FREEZE.yaml",
+    "LICENSE_DECISION.md",
+    "PUBLICATION_DECISIONS.md",
+    "SECURITY_PUBLICATION_GATE.md"
+  ],
+  "files": [
+    {
+      "bytes": 404,
+      "path": ".env.example",
+      "sha256": "4845b65bd5a310f94bbd996767fd9801270005ea3c0f398a21cbe8778070d3a9"
+    },
+    {
+      "bytes": 350,
+      "path": ".github/CODEOWNERS",
+      "sha256": "4261a573615aeb60481e699ec94eef4bcc8d7718aeead82f79e24e33d90b04e0"
+    },
+    {
+      "bytes": 1138,
+      "path": ".github/ISSUE_TEMPLATE/bug.yml",
+      "sha256": "9429cc8ff99b9cfc3d46d65b9f2b3de270f0314a73e4ede5ac32be723a08f0df"
+    },
+    {
+      "bytes": 240,
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "sha256": "a530cf6663f5ee9082ec78fae811d377d64a754acc109f84f5db2f0d8f7e7852"
+    },
+    {
+      "bytes": 617,
+      "path": ".github/ISSUE_TEMPLATE/documentation.yml",
+      "sha256": "c036b9ef5b2c38ea9e7f240586e806474f1a9fce793bf48eecf374625b38e572"
+    },
+    {
+      "bytes": 1010,
+      "path": ".github/ISSUE_TEMPLATE/rfc-proposal.yml",
+      "sha256": "764dc5955941beb7bbbeca5fbc7117eb1641c1703db369e77ad49b3ab6d70a82"
+    },
+    {
+      "bytes": 588,
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "sha256": "dc8277909eee3f3bd249bbb16a515b6b00cf9548df9c051fcb8cf8bed666347f"
+    },
+    {
+      "bytes": 2262,
+      "path": ".github/workflows/ci.yml",
+      "sha256": "fddc90e86923a7b998df431821cd039501635740ee09458579016e48c97df9c6"
+    },
+    {
+      "bytes": 299,
+      "path": ".gitignore",
+      "sha256": "4261dc6b225539e6aece3df694306b02dd3337eef5b4efc5820341ad1b7d3c8c"
+    },
+    {
+      "bytes": 563,
+      "path": ".pre-commit-config.yaml",
+      "sha256": "220196a5f44f49a0009ceab9b12125fe69e929339196db5f98ef08de05b60949"
+    },
+    {
+      "bytes": 3639,
+      "path": "01_ABSOLUTE_INVARIANTS.md",
+      "sha256": "ea72c898f207213b7390f44a1bbd92a69d5e5c8257e36aff1d021f73f6b1bde8"
+    },
+    {
+      "bytes": 1456,
+      "path": "07_BRANCH_PR_DISCIPLINE.md",
+      "sha256": "091a65670ff6a69e4a3264221a87087201becd1fb190e78e7c84eb80f6943d32"
+    },
+    {
+      "bytes": 3209,
+      "path": "09_ACCEPTANCE_TESTS.yaml",
+      "sha256": "a4974bdc5a8cf7c7ead558df6eb9c92e3ef32d905cabe043566ca5abf4a9ade6"
+    },
+    {
+      "bytes": 3327,
+      "path": "ARCHITECTURE.md",
+      "sha256": "778efee48dd39cd202291eb6b5db83f4c65b78167711b61f4ba7f16f72cff6d3"
+    },
+    {
+      "bytes": 1799,
+      "path": "BASELINE_CONTRACT_HASHES.yaml",
+      "sha256": "c01ed0bc5901cae90eb6282b866e2839554094f4784a79695916363e6975c690"
+    },
+    {
+      "bytes": 1595,
+      "path": "CODE_OF_CONDUCT.md",
+      "sha256": "8c36bd88cee14ee306a1dd86f4ce9d543261fef18d24fc049f8e2528d80c6712"
+    },
+    {
+      "bytes": 2596,
+      "path": "CONTRIBUTING.md",
+      "sha256": "0c2aa16c21069c505340ed4487389065c59c062e95515539718f1dcd6fb26b7d"
+    },
+    {
+      "bytes": 528,
+      "path": "DEPENDENCY_LICENSE_INVENTORY.md",
+      "sha256": "cb1f834fd43e3c4c09201ebc1732906c3296431a861fcded016f9deb063d04f8"
+    },
+    {
+      "bytes": 709,
+      "path": "Dockerfile",
+      "sha256": "bbf6b0bee52de569e0d42830dbf8b0459afc5138f203f127d67a688c6f9789fb"
+    },
+    {
+      "bytes": 3811,
+      "path": "GOVERNANCE.md",
+      "sha256": "4551a672476b6b44335768557460b8abc552b4d4a6e3872e95e1f064c3410fbb"
+    },
+    {
+      "bytes": 10258,
+      "path": "LICENSE",
+      "sha256": "325648a2d789644d9f57e7b102adc897d85127a25dbecfff251ffbe73f76b7f7"
+    },
+    {
+      "bytes": 877,
+      "path": "NOTICE",
+      "sha256": "9615ba3f67130d5e742545851e4c1440395462f62557ea42c27e054b1348f268"
+    },
+    {
+      "bytes": 238,
+      "path": "PUBLICATION_SAFETY_SCAN.json",
+      "sha256": "225560ef7c1e9619c7eed5d2f187e571998ef31d1157b8a1ed21655b39958e59"
+    },
+    {
+      "bytes": 3174,
+      "path": "PUBLIC_PROVENANCE.md",
+      "sha256": "b410efa196aa6fb4c33fce916c76a4137e41c3628cbc6e7ad2a78a8158a98608"
+    },
+    {
+      "bytes": 3616,
+      "path": "PUBLIC_SCOPE.md",
+      "sha256": "3bd41b4abefec35951aec1170c6fccc1abc786489c9438bfa324324dd8ca8b3d"
+    },
+    {
+      "bytes": 5433,
+      "path": "README.md",
+      "sha256": "2fb95744d9863889c9849666781568e265db91d88782f34f9871fbfe5333c5f0"
+    },
+    {
+      "bytes": 1776,
+      "path": "RELEASE_STATUS.md",
+      "sha256": "498564cc1dd81dc293bc27829a9eb9ac419727243dd52f0f2d5ec091ca3a926b"
+    },
+    {
+      "bytes": 2750,
+      "path": "SECURITY.md",
+      "sha256": "ccf80c8555db408c5df64238e71e7e20ae5414cf094cf9c45f4d1bdb353a95ac"
+    },
+    {
+      "bytes": 524,
+      "path": "docker-compose.dev.yml",
+      "sha256": "66489d1cd1a77c53acdcc5b9f3c744dde135963c1c4893aae5615a4ecf918b70"
+    },
+    {
+      "bytes": 1649,
+      "path": "docs/adr/0001-repository-structure-and-execution-mode.md",
+      "sha256": "9ab1814e12485632f654095fe3cc904e1a3358c29e37263713533ae03986ed3d"
+    },
+    {
+      "bytes": 1827,
+      "path": "docs/adr/0002-frozen-contract-hash-manifest.md",
+      "sha256": "24b56748088c182822bfda598e5c4eb94995d213ba314124597a9016039fd232"
+    },
+    {
+      "bytes": 4203,
+      "path": "docs/adr/0003-s1-postgres-revision-and-context-boundaries.md",
+      "sha256": "ad5c250f176cbc636d14e2e3be433f52b43bddcfb369cc5437e85d473f02afdc"
+    },
+    {
+      "bytes": 329,
+      "path": "migrations/0001_s1_case_evidence.rollback.sql",
+      "sha256": "61939355bc40da9017a5ba1e4de80ab63571bd7a5b41f5a16b864b7f323ee877"
+    },
+    {
+      "bytes": 2468,
+      "path": "migrations/0001_s1_case_evidence.sql",
+      "sha256": "435ce2caf98c080bba5ea15c2f59ea35c8c75106714cf73eb5418e4e0107ac0b"
+    },
+    {
+      "bytes": 1575,
+      "path": "protocols/protocol_registry_v0.1.yaml",
+      "sha256": "c1473518a19c48c06043c938de86c019408326d76e6f9cc03f648709fd437c89"
+    },
+    {
+      "bytes": 1163,
+      "path": "pyproject.toml",
+      "sha256": "4ad93c1c35e9b72edf3fcbe9f143e443011c3e8d498cf673019c3096648eed13"
+    },
+    {
+      "bytes": 1100,
+      "path": "rfcs/README.md",
+      "sha256": "c06f2288b714d9116bba99fb6b5099a4981123e77f76210ae9a0503f4e40ccac"
+    },
+    {
+      "bytes": 1144,
+      "path": "schemas/audit-event.schema.json",
+      "sha256": "5ab0b3096a0b86faa5e187ce569a7e61c712247020c5bc801d69bb716670f362"
+    },
+    {
+      "bytes": 1561,
+      "path": "schemas/case.schema.json",
+      "sha256": "1a443c5ace4c0def254b5029fa868a233e81f4a33dccc75a5db32a64f84a5c02"
+    },
+    {
+      "bytes": 1480,
+      "path": "schemas/context-manifest.schema.json",
+      "sha256": "84e8dc79709478b62338dc13123247d4c1a467789ca42112924159ed75301d2b"
+    },
+    {
+      "bytes": 2032,
+      "path": "schemas/evidence.schema.json",
+      "sha256": "6a63295229825d466df5628e3e34dea2dff63dcbfee103382ee8c65f73a1fd46"
+    },
+    {
+      "bytes": 3472,
+      "path": "schemas/model-profile.schema.json",
+      "sha256": "fd16d5c7a003d99469a2543646fb5df2efff5c90c9f225bae4fa869944153ead"
+    },
+    {
+      "bytes": 866,
+      "path": "schemas/phase-profile.schema.json",
+      "sha256": "1b61a3d2e1e09241e2e207fa1b8ff935b8abef11e4183e82dfd906c0b5681f63"
+    },
+    {
+      "bytes": 1278,
+      "path": "schemas/protocol-registry.schema.json",
+      "sha256": "d7568772915468171d6646e9d0db0abe685c818eaba03cacbe6c932a25bf852c"
+    },
+    {
+      "bytes": 2583,
+      "path": "schemas/run-manifest.schema.json",
+      "sha256": "8b6001b9ffc19ab732664fb99c8c5dcd74547e7cbb866f38e090e46b2b7b6b73"
+    },
+    {
+      "bytes": 475,
+      "path": "schemas/visibility.schema.json",
+      "sha256": "ebcf750575ebf9c24e80441835360928a88d301df5f0317f0e229be22b86cc38"
+    },
+    {
+      "bytes": 777,
+      "path": "src/human_cos/core/__init__.py",
+      "sha256": "c8a094a499998d9427fff7afb6c64e09dae5327627bdec6f248a4287415278b1"
+    },
+    {
+      "bytes": 8995,
+      "path": "src/human_cos/core/context.py",
+      "sha256": "449b915db43b323d848889e1906035137726f37f983695adf6593c4af21f4c1b"
+    },
+    {
+      "bytes": 4985,
+      "path": "src/human_cos/core/models.py",
+      "sha256": "ea802a80db2609bb3c45286202068b10753209fe18aee3d1ed0c1fe0a809ca96"
+    },
+    {
+      "bytes": 2450,
+      "path": "src/human_cos/core/visibility.py",
+      "sha256": "bd3cd5364663b4050c0dd2a78f10c44124d13421f89c86fcbe54b6b973a40732"
+    },
+    {
+      "bytes": 2039,
+      "path": "src/human_cos/protocols/cli.py",
+      "sha256": "2f58a1ef176e344df285f77d6a678a424044928b0bb8d961ed55ef49f0fa9287"
+    },
+    {
+      "bytes": 4832,
+      "path": "src/human_cos/protocols/frozen_contract.py",
+      "sha256": "5c473f21cf8e35513192ab22139c6ac5e7bf7d1c34ef8f78299a142193e107ce"
+    },
+    {
+      "bytes": 14780,
+      "path": "src/human_cos/protocols/registry.py",
+      "sha256": "2bc119ccc9d028ad057b1649cf9b89ece362b8aa12c06d8f429026fc36fdc3d4"
+    },
+    {
+      "bytes": 4007,
+      "path": "src/human_cos/protocols/schema_loader.py",
+      "sha256": "7f49a0f1137f2f46debc025da65bc4acd98dc5cac00efa418e9e192ed5fd8975"
+    },
+    {
+      "bytes": 2587,
+      "path": "src/human_cos/protocols/version.py",
+      "sha256": "2337d7120dcb7a53d99cad50ec25821f60a12bebedd1c81d2e8d66ae1fbe9e71"
+    },
+    {
+      "bytes": 230,
+      "path": "src/human_cos/storage/__init__.py",
+      "sha256": "8b35756bde906ea67ba20620e8a932409597aff8324d7cafe93fa89d7b7a3278"
+    },
+    {
+      "bytes": 668,
+      "path": "src/human_cos/storage/migrations.py",
+      "sha256": "51bc68b5cf02b085b732c71db8c1ee0af7b6466cc229d019c7da9a58df804dce"
+    },
+    {
+      "bytes": 11206,
+      "path": "src/human_cos/storage/repository.py",
+      "sha256": "004f15b9aa15670ff4ab7072981e1f79bd078a407682f45ee824ec2699fa0e4a"
+    },
+    {
+      "bytes": 2454,
+      "path": "tests/conftest.py",
+      "sha256": "324b27633c4faf921652a72b67226c85f3aca12cac62d0bfb878385b9def769d"
+    },
+    {
+      "bytes": 1652,
+      "path": "tests/contract/test_s1_models.py",
+      "sha256": "e485b1c8108ab14a5d47beaaabd73ca015f407b6d954240e03b0764bde2ff9f0"
+    },
+    {
+      "bytes": 8697,
+      "path": "tests/integration/test_s1_postgres.py",
+      "sha256": "ca2f811f3612691a1c431cc76d61e49c6f01c83b64b17f893e2cc5b47a33d629"
+    },
+    {
+      "bytes": 3793,
+      "path": "tests/protocol/test_frozen_contract.py",
+      "sha256": "bb6d3ee2eed3b314d8d322baacb2821cc843db1b16a75f2f843f90e5b0c35f62"
+    },
+    {
+      "bytes": 5045,
+      "path": "tests/protocol/test_no_silent_mutation.py",
+      "sha256": "9cf365a43e85731f713565bfcf1c005b349c026a8a6ca3db155d00b6beac74f0"
+    },
+    {
+      "bytes": 2243,
+      "path": "tests/protocol/test_publication_hardening.py",
+      "sha256": "b66fef5bacbcb537c97087256adee89b0de4bc0af829fd67fdf7f10fa77642fd"
+    },
+    {
+      "bytes": 3336,
+      "path": "tests/protocol/test_registry_constraints.py",
+      "sha256": "6d92f5b06af6214289e1f5a2211395965a279ec13eae7725344cdb67292f1472"
+    },
+    {
+      "bytes": 2721,
+      "path": "tests/protocol/test_registry_loader.py",
+      "sha256": "3a49b5f06bc56472e7f3beec34231118ee2d84340c7fd64654c4f7d8d0c12011"
+    },
+    {
+      "bytes": 7635,
+      "path": "tests/protocol/test_schema_validation.py",
+      "sha256": "fbe2c88cc7673ae64ad1c4e1552561c2ad534d7e56268d49cac58927cbb569a1"
+    },
+    {
+      "bytes": 595,
+      "path": "tests/unit/test_package_smoke.py",
+      "sha256": "49d6dddddef0d1c2437a32ac5b225e9c180a6d8d0a3b94eaa97d37a26e549473"
+    },
+    {
+      "bytes": 7865,
+      "path": "tests/unit/test_s1_context.py",
+      "sha256": "bc95c358dc030f7066c32eae8b6d20003faec44a56db8f3daa43f1f102c01b17"
+    },
+    {
+      "bytes": 3465,
+      "path": "tests/unit/test_s1_visibility.py",
+      "sha256": "2ef5f56330a286a568e02c7a6f35e3893b218ba85e08d3bbf2dbf435333fdec7"
+    },
+    {
+      "bytes": 831,
+      "path": "tests/unit/test_version.py",
+      "sha256": "17e27a0025a5f15cd8f02c8a41f4141eda231a3a9c3f4cc153107fcce75046f5"
+    },
+    {
+      "bytes": 270530,
+      "path": "uv.lock",
+      "sha256": "37267c6369be88608eecce1cf251dab0df2ea615131b5efbed1eb89425fb05a5"
+    }
+  ],
+  "license": "Apache-2.0",
+  "pen_name": "子君赋",
+  "prior_candidate_superseded": true,
+  "private_git_history_included": false,
+  "project": "Human-COS Public Core",
+  "publication_hardening_commit": "da2c62e21871e911ab26b877928676bc81056e09",
+  "publication_hardening_pr": 4,
+  "publication_staging_commit": "948e5b2a6a41df8946f9cd015b3b414ec39af9b1",
+  "pvr_verified": true,
+  "release_scope": "S0/S1",
+  "schema_version": "1.1",
+  "source_commit": "da2c62e21871e911ab26b877928676bc81056e09",
+  "source_repository": "Civilization-Leap/human-cos-runtime",
+  "target_repository": "Civilization-Leap/human-cos-public-core"
+}

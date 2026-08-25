@@ -1,0 +1,9 @@
+# Repository review routing only; not cognitive or real-world decision authority.
+* @Civilization-Leap
+/protocols/ @Civilization-Leap
+/schemas/ @Civilization-Leap
+/BASELINE_CONTRACT_HASHES.yaml @Civilization-Leap
+/SECURITY.md @Civilization-Leap
+/GOVERNANCE.md @Civilization-Leap
+/.github/workflows/ @Civilization-Leap
+/migrations/ @Civilization-Leap

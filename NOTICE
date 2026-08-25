@@ -1,0 +1,13 @@
+Human-COS Public Core
+Copyright 2026 ZhongXinWang (王忠新; pen name: 子君赋)
+
+Licensed under the Apache License, Version 2.0.
+
+Initial public-source provenance:
+- Private engineering repository: Civilization-Leap/human-cos-runtime
+- Source anchor: main@c48b630d98339a6a7a0ddec68926071420e699c5
+- Publication model: curated clean snapshot with new public Git history; private Git history excluded.
+
+No third-party source attribution notice was identified as required for the current Public Core publication candidate. External dependencies remain subject to their own licenses and are not relicensed by this NOTICE.
+
+Human-COS Public Core is a reference implementation and reproducibility surface. Publication of this code does not grant repository maintainers authority over independent professional judgment, external Human-COS implementations, or real-world decisions.

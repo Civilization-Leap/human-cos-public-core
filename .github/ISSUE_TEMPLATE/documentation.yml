@@ -1,0 +1,22 @@
+name: Documentation correction
+description: Report unclear, incorrect or internally inconsistent public documentation.
+title: "[Docs] "
+labels: []
+body:
+  - type: input
+    id: location
+    attributes:
+      label: File / section
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is unclear or incorrect?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting evidence or proposed correction
+      description: A correction may disagree with the project. Independent criticism is valid participation.
